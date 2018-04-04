@@ -16,9 +16,6 @@ class Delim(Parser):
             self.pattern = re.compile(self.pattern)
 
     def process(self):
-        defaults = self._defaults()
-        cols = defaults.get('values', [])
-
         with open(self.cache, 'r') as cache:
             for l in cache.readlines():
                 if self.ignore(l):  # comment or skip
@@ -39,6 +36,7 @@ class Delim(Parser):
                 self.set_defaults(i)
                 logger.debug(i)
 
-                yield i
+                yield i.__dict__()
+
 
 Plugin = Delim

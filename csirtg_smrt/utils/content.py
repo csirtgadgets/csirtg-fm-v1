@@ -75,6 +75,9 @@ def _is_delimited(f, mime):
         if (c - 2) <= second.count(d) <= (c + 2):
             return m[d]
 
+        if second.count(d) == 0 and first.count(d) > 2:
+            return m[d]
+
     return False
 
 

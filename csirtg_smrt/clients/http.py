@@ -14,6 +14,7 @@ import requests
 
 RE_SUPPORTED_DECODE = re.compile("zip|lzf|lzma|xz|lzop")
 RE_CACHE_TYPES = re.compile('([\w.-]+\.(csv|zip|txt|gz))$')
+RE_FQDN = r'((?!-))(xn--)?[a-z0-9][a-z0-9-_\.]{0,245}[a-z0-9]{0,1}\.(xn--)?([a-z0-9\-]{1,61}|[a-z0-9-]{1,30}\.[a-z]{2,})'
 
 FETCHER_TIMEOUT = os.getenv('CSIRTG_SMRT_FETCHER_TIMEOUT', 120)
 RETRIES = os.getenv('CSIRTG_SMRT_FETCHER_RETRIES', 3)
@@ -38,6 +39,8 @@ class Client(object):
         self.handle.headers['User-Agent'] = "csirtg-smrt/{0} (csirtgadgets.com)".format(VERSION)
         self.handle.headers['Accept'] = 'application/json'
 
+        self.provider = self.rule.get('provider')
+
         self._init_remote(feed)
         self._init_paths(feed)
 
@@ -52,8 +55,18 @@ class Client(object):
         self.username = None
         self.password = None
 
+        if not self.provider:
+            match = re.search(RE_FQDN, self.remote)
+            self.provider = match[0]
+
+            if not self.rule.defaults:
+                self.rule.defaults = {}
+
+            if not self.rule.defaults.get('provider'):
+                self.rule.defaults['provider'] = match[0]
+
     def _init_paths(self, feed):
-        self.dir = os.path.join(self.cache, self.rule.defaults.get('provider'))
+        self.dir = os.path.join(self.cache, self.provider)
         logger.debug(self.dir)
 
         if not os.path.exists(self.dir):

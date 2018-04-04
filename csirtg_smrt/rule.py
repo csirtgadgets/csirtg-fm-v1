@@ -7,6 +7,45 @@ import os
 logger = logging.getLogger(__name__)
 
 
+def _load_rules_dir(path):
+    for f in sorted(os.listdir(path)):
+        if f.startswith('.'):
+            continue
+
+        if os.path.isdir(f):
+            continue
+
+        logger.info("processing {0}/{1}".format(path, f))
+
+        try:
+            r = Rule(path=os.path.join(path, f))
+        except RuleUnsupported as e:
+            logger.error(e)
+            continue
+
+        for feed in r.feeds:
+            yield r, feed
+
+
+def load_rules(rule, feed=None):
+    if os.path.isdir(rule):
+        return _load_rules_dir(rule)
+
+    logger.info("processing {0}".format(rule))
+    try:
+        rule = Rule(path=rule)
+    except Exception as e:
+        logger.error(e)
+
+    if feed:
+        # replace the feeds dict with the single feed
+        # raises KeyError if it doesn't exist
+        rule.feeds = {feed: rule.feeds[feed]}
+
+    for f in rule.feeds:
+        yield rule, f
+
+
 class Rule(dict):
 
     def __init__(self, path=None, rule=None, **kwargs):
@@ -26,6 +65,7 @@ class Rule(dict):
                 self.skip = d.get('skip')
                 self.skip_first = d.get('skip_first')
                 self.remote = d.get('remote')
+                self.provider = d.get('provider')
                 self.replace = d.get('replace')
                 self.itype = d.get('itype')
                 self.remote_pattern = d.get('remote_pattern')
@@ -48,6 +88,7 @@ class Rule(dict):
             self.skip = rule.get('skip')
             self.skip_first = rule.get('skip_first')
             self.remote = rule.get('remote')
+            self.provider = rule.get('provider')
             self.replace = rule.get('replace')
             self.itype = rule.get('itype')
             self.remote_pattern = rule.get('remote_pattern')

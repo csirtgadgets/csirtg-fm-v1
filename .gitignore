@@ -1,3 +1,4 @@
+.pytest_cache/
 clean.sh
 .DS_Store
 deb-build/

@@ -56,38 +56,41 @@ class Parser(object):
         self.line_count = 0
 
     def ignore(self, line):
-        if line == '':
-            return True
-
-        if self.is_comment(line):
+        if line == '' or self.is_comment(line):
             return True
 
         self.line_count += 1
         if self.line_count == 1 and self.skip_first:
             return True
 
-        if self.skip:
-            if self.skip.search(line):
-                return True
+        if self.skip and self.skip.search(line):
+            return True
 
-        if self.line_filter:
-            if not self.line_filter.search(line):
-                return True
+        if self.line_filter and not self.line_filter.search(line):
+            return True
 
     def is_comment(self, line):
         if self.comments.search(line):
             return True
 
     def _defaults(self):
-        defaults = self.rule.defaults
+        defaults = self.rule.defaults or {}
 
-        if self.rule.feeds[self.feed].get('defaults'):
-            for d in self.rule.feeds[self.feed].get('defaults'):
-                defaults[d] = self.rule.feeds[self.feed]['defaults'][d]
+        if not self.rule.feeds[self.feed].get('defaults'):
+            return defaults
+
+        for d in self.rule.feeds[self.feed].get('defaults'):
+            if not d:
+                continue
+
+            defaults[d] = self.rule.feeds[self.feed]['defaults'][d]
 
         return defaults
 
     def set_defaults(self, i):
+        if not self.rule.defaults and not self.rule.feeds[self.feed].get('defaults'):
+            return
+
         for k, v in self._defaults().items():
             setattr(i, k, v)
 

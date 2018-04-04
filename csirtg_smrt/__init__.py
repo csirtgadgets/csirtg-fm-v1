@@ -8,14 +8,22 @@ from argparse import RawDescriptionHelpFormatter
 from pprint import pprint
 import sys
 import select
+import arrow
 
 from csirtg_smrt.constants import SMRT_RULES_PATH
 from csirtg_smrt.rule import Rule
 from csirtg_smrt.utils import setup_logging, get_argument_parser, load_plugin, setup_signals, \
     setup_runtime_path, chunk
 from csirtg_smrt.exceptions import RuleUnsupported
-from csirtg_indicator.utils import resolve_itype
+from csirtg_indicator.utils import resolve_itype, normalize_itype
 from csirtg_indicator.exceptions import InvalidIndicator
+from csirtg_indicator.format import FORMATS
+from csirtg_indicator.constants import COLUMNS
+from csirtg_indicator import Indicator
+
+
+FORMAT = os.getenv('CSIRTG_SMRT_FORMAT', 'table')
+STDOUT_FIELDS = COLUMNS
 
 # http://python-3-patterns-idioms-test.readthedocs.org/en/latest/Factory.html
 # https://gist.github.com/pazdera/1099559
@@ -32,50 +40,9 @@ class Smrt(object):
     def __init__(self, **kwargs):
         pass
 
-    def _load_rules_dir(self, rule):
-        for f in sorted(os.listdir(rule)):
-            if f.startswith('.'):
-                continue
-
-            if os.path.isdir(f):
-                continue
-
-            logger.info("processing {0}/{1}".format(rule, f))
-
-            try:
-                r = Rule(path=os.path.join(rule, f))
-            except RuleUnsupported as e:
-                logger.error(e)
-                continue
-
-            for feed in r.feeds:
-                yield r, feed
-
-    def load_rules(self, rule, feed=None):
-        if os.path.isdir(rule):
-            return self._load_feeds_dir(rule)
-
-        logger.info("processing {0}".format(rule))
-        try:
-            rule = Rule(path=rule)
-        except Exception as e:
-            logger.error(e)
-
-        if feed:
-            # replace the feeds dict with the single feed
-            # raises KeyError if it doesn't exist
-            rule.feeds = {feed: rule.feeds[feed]}
-
-        for f in rule.feeds:
-            yield rule, f
-
-    def load_parser(self, parser_name):
-        plugin_path = os.path.join(os.path.dirname(__file__), 'parsers')
-        return load_plugin(plugin_path, parser_name)
-
     def is_valid(self, i):
         try:
-            resolve_itype(i.indicator)
+            resolve_itype(i['indicator'])
             return True
         except InvalidIndicator as e:
             if logger.getEffectiveLevel() == logging.DEBUG:
@@ -83,12 +50,55 @@ class Smrt(object):
                     raise e
             return False
 
+    def clean_indicator(self, i, rule, feed):
+        if isinstance(i, dict):
+            i = Indicator(**i)
+
+        if not i.firsttime:
+            i.firsttime = i.lasttime
+
+        if not i.reporttime:
+            i.reporttime = arrow.utcnow().datetime
+
+        if not i.group:
+            i.group = 'everyone'
+
+        if not i.tlp:
+            i.tlp = 'white'
+
+        if not i.confidence:
+            i.confidence = 2
+            if i.tags and len(i.tags) > 1:
+                i.confidence = 3
+
+            if i.itype == 'ipv4':
+                if not i.tags:
+                    i.confidence = 2
+
+                elif 'scanner' in i.tags:
+                    i.confidence = 4
+
+                elif len(i.tags) > 1:
+                    i.confidence = 4
+
+            elif i.itype == 'url' and len(i.tags) > 1:
+                i.confidence = 4
+
+            elif i.itype == 'email' and len(i.tags) > 1:
+                i.confidence = 4
+
+        return i
+
     def process(self, rule, feed, parser_name, cli):
-        parser = self.load_parser(parser_name)
+        # detect and load the parser
+        plugin_path = os.path.join(os.path.dirname(__file__), 'parsers')
+        parser = load_plugin(plugin_path, parser_name)
         parser = parser.Plugin(rule=rule, feed=feed, cache=cli.cache)
 
+        # bring up the pipeline
         indicators = parser.process()
         indicators = (i for i in indicators if self.is_valid(i))
+        indicators = (self.clean_indicator(i, rule, feed) for i in indicators)
 
         indicators_batches = chunk(indicators, int(500))
         for batch in indicators_batches:
@@ -118,6 +128,7 @@ def main():
         parents=[p],
     )
 
+    p.add_argument('--client', default='stdout')
     p.add_argument("-r", "--rule", help="specify the rules directory or specific rules file [default: %(default)s",
                    default=SMRT_RULES_PATH)
 
@@ -131,6 +142,10 @@ def main():
 
     p.add_argument('--skip-invalid', help="skip invalid indicators in DEBUG (-d) mode", action="store_true")
     p.add_argument('--skip-broken', help='skip seemingly broken feeds', action='store_true')
+
+    p.add_argument('--format', help='specify output format [default: %(default)s]"', default=FORMAT,
+                   choices=FORMATS.keys())
+    p.add_argument('--fields', help='specify fields for stdout [default %(default)s]"', default=','.join(STDOUT_FIELDS))
 
     args = p.parse_args()
 
@@ -155,7 +170,9 @@ def main():
 
     indicators = []
 
-    for r, f in s.load_rules(args.rule, feed=args.feed):
+    from .rule import load_rules
+
+    for r, f in load_rules(args.rule, feed=args.feed):
         # detect which client we should be using
         from .clients.http import Client
         cli = Client(r, f)
@@ -177,7 +194,7 @@ def main():
             parser_name = r.feeds[f].get('parser') or r.parser or 'pattern'
 
         # process the indicators by passing the parser and file handle [or data]
-        logger.info('processing: {} - {}:{}'.format(args.rule, r.defaults['provider'], f))
+        logger.info('processing: {} - {}:{}'.format(args.rule, r.provider, f))
         try:
             for i in s.process(r, f, parser_name, cli):
                 if i:
@@ -188,7 +205,8 @@ def main():
             import traceback
             traceback.print_exc()
 
-    pprint(indicators)
+    if args.client == 'stdout':
+        print(FORMATS[args.format](data=indicators, cols=args.fields.split(',')))
 
 
 if __name__ == "__main__":

@@ -10,10 +10,6 @@
 #
 # To remove the limits, sign up for an API key at https://csirtg.io
 
-defaults:
-  provider: csirtg.io
-  confidence: 4
-
 feeds:
   # A feed of IP addresses block by a firewall (e.g. port scanners)
   darknet:
