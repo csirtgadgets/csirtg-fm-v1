@@ -3,7 +3,7 @@ import re
 
 import feedparser
 from pprint import pprint
-from csirtg_smrt.parser import Parser
+from csirtg_fm.parser import Parser
 
 
 class Rss(Parser):

@@ -1,5 +1,5 @@
 import py.test
-from csirtg_smrt.utils.timestamps import parse_timestamp
+from csirtg_fm.utils.timestamps import parse_timestamp
 import arrow
 
 

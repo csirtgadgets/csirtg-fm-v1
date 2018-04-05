@@ -3,6 +3,10 @@ from setuptools import setup, find_packages
 import versioneer
 import sys
 
+import sys
+if sys.version_info < (3,6):
+    sys.exit('Sorry, Python < 3,6 is not supported')
+
 # vagrant doesn't appreciate hard-linking
 if os.environ.get('USER') == 'vagrant' or os.path.isdir('/vagrant'):
     del os.link
@@ -20,7 +24,7 @@ if sys.argv[-1] == 'test':
         err_msg = e.message.replace("No module named ", "")
         msg = "%s is not installed. Install your test requirements." % err_msg
         raise ImportError(msg)
-    r = os.system('py.test test -v --cov=csirtg_smrt --cov-fail-under=45')
+    r = os.system('py.test test -v --cov=csirtg_fm --cov-fail-under=45')
     if r == 0:
         sys.exit()
     else:
@@ -28,10 +32,10 @@ if sys.argv[-1] == 'test':
 
 package_data = {}
 if sys.platform == 'nt':
-    package_data['csirtg_smrt'] = os.path.join('tools', 'magic1.dll')
+    package_data['csirtg_fm'] = os.path.join('tools', 'magic1.dll')
 
 setup(
-    name="csirtg_smrt",
+    name="csirtg_fm",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     package_data=package_data,
@@ -53,7 +57,8 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'csirtg-smrt=csirtg_smrt:main',
+            'csirtg-smrt=csirtg_fm:main',
+            'csirtg-fm=csirtg_fm:main'
         ]
     },
 )

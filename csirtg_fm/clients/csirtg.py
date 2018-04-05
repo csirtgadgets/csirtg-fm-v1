@@ -1,7 +1,7 @@
 from csirtgsdk.client import Client as CSIRTGClient
 from csirtgsdk.indicator import Indicator
 import csirtg_indicator
-from csirtg_smrt.client.plugin import Client
+from csirtg_fm.client.plugin import Client
 from pprint import pprint
 import os
 

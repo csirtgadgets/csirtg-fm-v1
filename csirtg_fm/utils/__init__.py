@@ -1,6 +1,6 @@
 import pkgutil
 import logging
-from csirtg_smrt.constants import LOG_FORMAT, RUNTIME_PATH, LOGLEVEL, VERSION
+from csirtg_fm.constants import LOG_FORMAT, RUNTIME_PATH, LOGLEVEL, VERSION
 from argparse import ArgumentParser
 import signal
 import os

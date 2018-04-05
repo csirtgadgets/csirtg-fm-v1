@@ -1,5 +1,5 @@
 import socket
-from csirtg_smrt.utils.timestamps import parse_timestamp
+from csirtg_fm.utils.timestamps import parse_timestamp
 from csirtg_indicator.utils import resolve_itype
 from csirtg_indicator import Indicator
 from pprint import pprint

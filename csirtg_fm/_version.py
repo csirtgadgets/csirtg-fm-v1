@@ -42,8 +42,8 @@ def get_config():
     cfg.VCS = "git"
     cfg.style = "pep440"
     cfg.tag_prefix = ""
-    cfg.parentdir_prefix = "csirtg-smrt-"
-    cfg.versionfile_source = "csirtg_smrt/_version.py"
+    cfg.parentdir_prefix = "csirtg-fm-"
+    cfg.versionfile_source = "csirtg_fm/_version.py"
     cfg.verbose = False
     return cfg
 

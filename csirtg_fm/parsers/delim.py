@@ -1,4 +1,4 @@
-from csirtg_smrt.parsers import Parser
+from csirtg_fm.parsers import Parser
 import re
 from pprint import pprint
 import logging
@@ -22,7 +22,7 @@ class Delim(Parser):
                     continue
 
                 l = l.rstrip()
-                l = l.replace('\"', '')
+                l = l.lstrip()
 
                 logger.debug(l)
                 m = self.pattern.split(l)

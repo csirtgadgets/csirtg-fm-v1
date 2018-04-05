@@ -97,12 +97,12 @@ def get_mimetype(f):
     return mag.file(f)
 
 
-def get_type(f, mime=None):
+def get_type(f_name, mime=None):
     if not mime:
-        mime = get_mimetype(f)
+        mime = get_mimetype(f_name)
 
-    if isinstance(f, str):
-        f = open(f)
+    if isinstance(f_name, str):
+        f = open(f_name)
 
     TESTS = [
         _is_xml,
@@ -116,6 +116,12 @@ def get_type(f, mime=None):
         t = tt(f, mime)
         if t:
             return t
+
+    if f_name.endswith('.csv') or f_name.endswith('.xls'):
+        return 'csv'
+
+    if f_name.endswith('.tsv'):
+        return 'tsv'
 
 
 if __name__ == "__main__":

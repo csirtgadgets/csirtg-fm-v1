@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import logging
 import os.path
@@ -10,32 +10,35 @@ import sys
 import select
 import arrow
 
-from csirtg_smrt.constants import SMRT_RULES_PATH
-from csirtg_smrt.rule import Rule
-from csirtg_smrt.utils import setup_logging, get_argument_parser, load_plugin, setup_signals, \
-    setup_runtime_path, chunk
-from csirtg_smrt.exceptions import RuleUnsupported
+from csirtg_fm.constants import FM_RULES_PATH
+from csirtg_fm.rule import Rule
+from csirtg_fm.utils import setup_logging, get_argument_parser, load_plugin, setup_signals, setup_runtime_path, chunk
 from csirtg_indicator.utils import resolve_itype, normalize_itype
 from csirtg_indicator.exceptions import InvalidIndicator
 from csirtg_indicator.format import FORMATS
 from csirtg_indicator.constants import COLUMNS
 from csirtg_indicator import Indicator
 
+from csirtg_fm.exceptions import RuleUnsupported
+from csirtg_fm.constants import FIREBALL_SIZE
+from csirtg_fm.utils.content import get_type
+from .clients.http import Client
+from .rule import load_rules
 
-FORMAT = os.getenv('CSIRTG_SMRT_FORMAT', 'table')
+FORMAT = os.getenv('CSIRTG_FM_FORMAT', 'table')
 STDOUT_FIELDS = COLUMNS
 
 # http://python-3-patterns-idioms-test.readthedocs.org/en/latest/Factory.html
 # https://gist.github.com/pazdera/1099559
 logging.getLogger("requests").setLevel(logging.WARNING)
 
-if os.getenv('CSIRTG_SMRT_HTTP_TRACE', '0') == '0':
+if os.getenv('CSIRTG_FM_HTTP_TRACE', '0') == '0':
     logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
 
-class Smrt(object):
+class FM(object):
 
     def __init__(self, **kwargs):
         pass
@@ -50,7 +53,7 @@ class Smrt(object):
                     raise e
             return False
 
-    def clean_indicator(self, i, rule, feed):
+    def clean_indicator(self, i):
         if isinstance(i, dict):
             i = Indicator(**i)
 
@@ -66,26 +69,29 @@ class Smrt(object):
         if not i.tlp:
             i.tlp = 'white'
 
-        if not i.confidence:
-            i.confidence = 2
-            if i.tags and len(i.tags) > 1:
-                i.confidence = 3
+        if i.confidence:
+            return i
 
-            if i.itype == 'ipv4':
-                if not i.tags:
-                    i.confidence = 2
+        i.confidence = 2
+        if i.tags and len(i.tags) > 1:
+            i.confidence = 3
 
-                elif 'scanner' in i.tags:
-                    i.confidence = 4
+        if i.itype == 'ipv4':
+            if not i.tags:
+                i.confidence = 2
 
-                elif len(i.tags) > 1:
-                    i.confidence = 4
-
-            elif i.itype == 'url' and len(i.tags) > 1:
+            elif 'scanner' in i.tags:
                 i.confidence = 4
 
-            elif i.itype == 'email' and len(i.tags) > 1:
+            elif len(i.tags) > 1:
                 i.confidence = 4
+
+        elif i.itype == 'url' and len(i.tags) > 1:
+            i.confidence = 4
+
+        elif i.itype == 'email' and len(i.tags) > 1:
+            i.confidence = 4
+
 
         return i
 
@@ -98,9 +104,9 @@ class Smrt(object):
         # bring up the pipeline
         indicators = parser.process()
         indicators = (i for i in indicators if self.is_valid(i))
-        indicators = (self.clean_indicator(i, rule, feed) for i in indicators)
+        indicators = (self.clean_indicator(i) for i in indicators)
 
-        indicators_batches = chunk(indicators, int(500))
+        indicators_batches = chunk(indicators, int(FIREBALL_SIZE))
         for batch in indicators_batches:
             # send batch
 
@@ -117,20 +123,20 @@ def main():
         description=textwrap.dedent('''\
         Env Variables:
             CSIRTG_RUNTIME_PATH
-            CSIRTG_SMRT_TOKEN
+            
 
         example usage:
-            $ csirtg-smrt --rule rules/default
-            $ csirtg-smrt --rule default/csirtg.yml --feed port-scanners --remote http://localhost:5000
+            $ csirtg-fm --rule rules/default
+            $ csirtg-fm --rule default/csirtg.yml --feed port-scanners --remote http://localhost:5000
         '''),
         formatter_class=RawDescriptionHelpFormatter,
-        prog='csirtg-smrt',
+        prog='csirtg-fm',
         parents=[p],
     )
 
     p.add_argument('--client', default='stdout')
     p.add_argument("-r", "--rule", help="specify the rules directory or specific rules file [default: %(default)s",
-                   default=SMRT_RULES_PATH)
+                   default=FM_RULES_PATH)
 
     p.add_argument("-f", "--feed", help="specify the feed to process")
 
@@ -158,7 +164,7 @@ def main():
     
     logger.info('starting...')
 
-    s = Smrt()
+    s = FM()
 
     data = None
     if select.select([sys.stdin, ], [], [], 0.0)[0]:
@@ -170,11 +176,11 @@ def main():
 
     indicators = []
 
-    from .rule import load_rules
+
 
     for r, f in load_rules(args.rule, feed=args.feed):
         # detect which client we should be using
-        from .clients.http import Client
+
         cli = Client(r, f)
 
         # fetch the feeds
@@ -182,7 +188,7 @@ def main():
             cli.fetch()
 
         # decode the content and load the parser
-        from csirtg_smrt.utils.content import get_type
+
         try:
             logger.debug('testing parser: %s' % cli.cache)
             parser_name = get_type(cli.cache)

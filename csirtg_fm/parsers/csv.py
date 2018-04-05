@@ -1,4 +1,4 @@
-from csirtg_smrt.parsers.delim import Delim
+from csirtg_fm.parsers.delim import Delim
 
 
 class Csv(Delim):

@@ -2,7 +2,7 @@ import logging
 import subprocess
 import os
 from pprint import pprint
-from csirtg_smrt.constants import VERSION, SMRT_CACHE
+from csirtg_fm.constants import VERSION, FM_CACHE
 from datetime import datetime
 import magic
 import re
@@ -16,10 +16,10 @@ RE_SUPPORTED_DECODE = re.compile("zip|lzf|lzma|xz|lzop")
 RE_CACHE_TYPES = re.compile('([\w.-]+\.(csv|zip|txt|gz))$')
 RE_FQDN = r'((?!-))(xn--)?[a-z0-9][a-z0-9-_\.]{0,245}[a-z0-9]{0,1}\.(xn--)?([a-z0-9\-]{1,61}|[a-z0-9-]{1,30}\.[a-z]{2,})'
 
-FETCHER_TIMEOUT = os.getenv('CSIRTG_SMRT_FETCHER_TIMEOUT', 120)
-RETRIES = os.getenv('CSIRTG_SMRT_FETCHER_RETRIES', 3)
-RETRIES_DELAY = os.getenv('CSIRTG_SMRT_FETCHER_RETRY_DELAY', 30)  # seconds
-NO_HEAD = os.getenv('CSIRTG_SMRT_FETCHER_NOHEAD')
+FETCHER_TIMEOUT = os.getenv('CSIRTG_FM_FETCHER_TIMEOUT', 120)
+RETRIES = os.getenv('CSIRTG_FM_FETCHER_RETRIES', 3)
+RETRIES_DELAY = os.getenv('CSIRTG_FM_FETCHER_RETRY_DELAY', 30)  # seconds
+NO_HEAD = os.getenv('CSIRTG_FM_FETCHER_NOHEAD')
 
 logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -31,12 +31,12 @@ class Client(object):
 
         self.feed = feed
         self.rule = rule
-        self.cache = kwargs.get('cache', SMRT_CACHE)
+        self.cache = kwargs.get('cache', FM_CACHE)
         self.timeout = FETCHER_TIMEOUT
         self.verify_ssl = kwargs.get('verify_ssl', True)
 
         self.handle = requests.session()
-        self.handle.headers['User-Agent'] = "csirtg-smrt/{0} (csirtgadgets.com)".format(VERSION)
+        self.handle.headers['User-Agent'] = "csirtg-fm/{0} (csirtgadgets.com)".format(VERSION)
         self.handle.headers['Accept'] = 'application/json'
 
         self.provider = self.rule.get('provider')

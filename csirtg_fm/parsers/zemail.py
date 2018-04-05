@@ -1,15 +1,15 @@
 from csirtg_mail import from_string
-from csirtg_smrt.parser import Parser
+from csirtg_fm.parser import Parser
 import logging
 import os
 import re
 from pprint import pprint
 
 TOKEN = os.environ.get('CSIRTG_TOKEN', None)
-CSIRTG_SMRT_PREDICT = False
+CSIRTG_FM_PREDICT = False
 RE_PREDICT = re.compile(os.getenv('CSIRTG_PREDICT_RE', '^https?'))
-if os.getenv('CSIRTG_SMRT_PREDICT') == '1':
-    CSIRTG_SMRT_PREDICT = True
+if os.getenv('CSIRTG_FM_PREDICT') == '1':
+    CSIRTG_FM_PREDICT = True
 
 try:
     from csirtgsdk.client import Client as csirtg_client
@@ -87,7 +87,7 @@ class Email(Parser):
                 i['message'] = d
                 i['indicator'] = _i
 
-                if not CSIRTG_SMRT_PREDICT:
+                if not CSIRTG_FM_PREDICT:
                     yield i
                     continue
 

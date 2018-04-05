@@ -1,11 +1,11 @@
 import copy
 import json
-from csirtg_smrt.parser import Parser
+from csirtg_fm.parser import Parser
 import logging
 import os
 from pprint import pprint
 
-TRACE = os.environ.get('CSIRTG_SMRT_PARSER_TRACE')
+TRACE = os.environ.get('CSIRTG_FM_PARSER_TRACE')
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

@@ -1,7 +1,7 @@
 import yaml
 import json
 import logging
-from csirtg_smrt.exceptions import RuleUnsupported
+from csirtg_fm.exceptions import RuleUnsupported
 import os
 
 logger = logging.getLogger(__name__)
@@ -36,6 +36,7 @@ def load_rules(rule, feed=None):
         rule = Rule(path=rule)
     except Exception as e:
         logger.error(e)
+        return
 
     if feed:
         # replace the feeds dict with the single feed
