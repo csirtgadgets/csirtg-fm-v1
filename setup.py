@@ -54,6 +54,7 @@ setup(
     author_email="wes@csirtgadgets.com",
     packages=find_packages(exclude=['test']),
     install_requires=[
+        #'csirtg_indicator>=2.0'
     ],
     entry_points={
         'console_scripts': [

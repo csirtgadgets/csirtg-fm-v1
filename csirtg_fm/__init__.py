@@ -14,7 +14,6 @@ from csirtg_fm.constants import FM_RULES_PATH
 from csirtg_fm.rule import Rule
 from csirtg_fm.utils import setup_logging, get_argument_parser, load_plugin, setup_signals, setup_runtime_path, chunk
 from csirtg_indicator.utils import resolve_itype, normalize_itype
-from csirtg_indicator.exceptions import InvalidIndicator
 from csirtg_indicator.format import FORMATS
 from csirtg_indicator.constants import COLUMNS
 from csirtg_indicator import Indicator
@@ -47,7 +46,7 @@ class FM(object):
         try:
             resolve_itype(i['indicator'])
             return True
-        except InvalidIndicator as e:
+        except TypeError as e:
             if logger.getEffectiveLevel() == logging.DEBUG:
                 if not self.skip_invalid:
                     raise e
@@ -57,11 +56,11 @@ class FM(object):
         if isinstance(i, dict):
             i = Indicator(**i)
 
-        if not i.firsttime:
-            i.firsttime = i.lasttime
+        if not i.first_at:
+            i.first_at = i.last_at
 
-        if not i.reporttime:
-            i.reporttime = arrow.utcnow().datetime
+        if not i.reported_at:
+            i.reported_at = arrow.utcnow().datetime
 
         if not i.group:
             i.group = 'everyone'
@@ -91,7 +90,6 @@ class FM(object):
 
         elif i.itype == 'email' and len(i.tags) > 1:
             i.confidence = 4
-
 
         return i
 
@@ -150,7 +148,7 @@ def main():
     p.add_argument('--skip-broken', help='skip seemingly broken feeds', action='store_true')
 
     p.add_argument('--format', help='specify output format [default: %(default)s]"', default=FORMAT,
-                   choices=FORMATS.keys())
+                   choices=FORMATS)
     p.add_argument('--fields', help='specify fields for stdout [default %(default)s]"', default=','.join(STDOUT_FIELDS))
 
     args = p.parse_args()
@@ -212,7 +210,8 @@ def main():
             traceback.print_exc()
 
     if args.client == 'stdout':
-        print(FORMATS[args.format](data=indicators, cols=args.fields.split(',')))
+        for l in FORMATS[args.format](data=indicators, cols=args.fields.split(',')):
+            print(l)
 
 
 if __name__ == "__main__":

@@ -19,6 +19,7 @@ def get_argument_parser():
 
 import importlib
 
+
 # py3.5+
 def load_plugin(path, plugin):
     path = os.path.join(path, ('%s.py' % plugin))
@@ -26,6 +27,7 @@ def load_plugin(path, plugin):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
 
 def setup_logging(args):
     loglevel = logging.getLevelName(LOGLEVEL)

@@ -13,6 +13,7 @@ SQLAlchemy>=1.2
 tornado>=5.0
 nltk>=3.2,<3.3
 
-csirtg_indicator>=0.0.0b25
+#csirtg_indicator>=0.0.0b25
+#https://github.com/csirtgadgets/silver-meme/archive/master.zip
 csirtgsdk>=0.0.0a9
 csirtg_mail>=0.0.0a9
