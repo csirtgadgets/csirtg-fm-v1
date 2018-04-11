@@ -10,22 +10,25 @@ import sys
 import select
 import arrow
 
-from csirtg_fm.constants import FM_RULES_PATH
-from csirtg_fm.rule import Rule
-from csirtg_fm.utils import setup_logging, get_argument_parser, load_plugin, setup_signals, setup_runtime_path, chunk
 from csirtg_indicator.utils import resolve_itype, normalize_itype
 from csirtg_indicator.format import FORMATS
 from csirtg_indicator.constants import COLUMNS
 from csirtg_indicator import Indicator
 
+from csirtg_fm.constants import FM_RULES_PATH, CACHE_PATH
+from csirtg_fm.rule import Rule
+from csirtg_fm.utils import setup_logging, get_argument_parser, load_plugin, setup_signals, setup_runtime_path, chunk
 from csirtg_fm.exceptions import RuleUnsupported
 from csirtg_fm.constants import FIREBALL_SIZE
 from csirtg_fm.utils.content import get_type
 from .clients.http import Client
 from .rule import load_rules
+from .archiver import Archiver, NOOPArchiver
 
 FORMAT = os.getenv('CSIRTG_FM_FORMAT', 'table')
 STDOUT_FIELDS = COLUMNS
+ARCHIVE_PATH = os.environ.get('CSIRTG_SMRT_ARCHIVE_PATH', CACHE_PATH)
+ARCHIVE_PATH = os.path.join(ARCHIVE_PATH, 'fm.db')
 
 # http://python-3-patterns-idioms-test.readthedocs.org/en/latest/Factory.html
 # https://gist.github.com/pazdera/1099559
@@ -40,8 +43,12 @@ logger = logging.getLogger(__name__)
 class FM(object):
 
     def __init__(self, **kwargs):
-        pass
+        self.archiver = kwargs.get('archiver', NOOPArchiver())
 
+        pprint(kwargs)
+        pprint(self.archiver)
+
+    # silver-meme?
     def is_valid(self, i):
         try:
             resolve_itype(i['indicator'])
@@ -52,6 +59,7 @@ class FM(object):
                     raise e
             return False
 
+    # silver-meme?
     def clean_indicator(self, i):
         if isinstance(i, dict):
             i = Indicator(**i)
@@ -93,6 +101,20 @@ class FM(object):
 
         return i
 
+    def is_archived(self, indicator):
+        return self.archiver.search(indicator)
+
+    def is_archived_with_log(self, i):
+        if self.is_archived(i):
+            logger.debug('skipping: {}/{}/{}/{}'.format(i.indicator, i.provider, i.first_at, i.last_at))
+            return True
+        else:
+            logger.debug('adding: {}/{}/{}/{}'.format(i.indicator, i.provider, i.first_at, i.last_at))
+            return False
+
+    def archive(self, indicator):
+        return self.archiver.create(indicator)
+
     def process(self, rule, feed, parser_name, cli):
         # detect and load the parser
         plugin_path = os.path.join(os.path.dirname(__file__), 'parsers')
@@ -109,10 +131,15 @@ class FM(object):
             # send batch
 
             # archive
-
-            # yield
+            self.archiver.begin()
             for i in batch:
-                yield i
+                if self.is_archived_with_log(i):
+                    continue
+
+                yield i.format_keys()
+                self.archive(i)
+
+            self.archiver.commit()
 
 
 def main():
@@ -151,6 +178,9 @@ def main():
                    choices=FORMATS)
     p.add_argument('--fields', help='specify fields for stdout [default %(default)s]"', default=','.join(STDOUT_FIELDS))
 
+    p.add_argument('--remember-path', help='specify remember db path [default: %(default)s', default=ARCHIVE_PATH)
+    p.add_argument('--remember', help='remember what has been already processed', action='store_true')
+
     args = p.parse_args()
 
     setup_logging(args)
@@ -162,7 +192,11 @@ def main():
     
     logger.info('starting...')
 
-    s = FM()
+    archiver = NOOPArchiver()
+    if args.remember:
+        archiver = Archiver(dbfile=args.remember_path)
+
+    s = FM(archiver=archiver)
 
     data = None
     if select.select([sys.stdin, ], [], [], 0.0)[0]:
@@ -173,8 +207,6 @@ def main():
         fetch = False
 
     indicators = []
-
-
 
     for r, f in load_rules(args.rule, feed=args.feed):
         # detect which client we should be using
