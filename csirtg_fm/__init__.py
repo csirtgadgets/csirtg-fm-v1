@@ -9,6 +9,8 @@ from pprint import pprint
 import sys
 import select
 import arrow
+import itertools
+from time import sleep
 
 from csirtg_indicator.utils import resolve_itype, normalize_itype
 from csirtg_indicator.format import FORMATS
@@ -44,20 +46,37 @@ class FM(object):
 
     def __init__(self, **kwargs):
         self.archiver = kwargs.get('archiver', NOOPArchiver())
+        self.goback = kwargs.get('goback')
+        self.skip_invalid = kwargs.get('skip_invalid')
+        self.client = kwargs.get('client')
 
-        pprint(kwargs)
-        pprint(self.archiver)
+        if self.client and self.client != 'stdout':
+            self._init_client()
 
-    # silver-meme?
+    def _init_client(self):
+        if self.client != 'stdout':
+            plugin_path = os.path.join(os.path.dirname(__file__), 'clients')
+            print(plugin_path)
+            c = load_plugin(plugin_path, self.client)
+            if not c:
+                raise RuntimeError("Unable to load plugin: {}".format(c))
+
+            self.client = c
+
     def is_valid(self, i):
         try:
             resolve_itype(i['indicator'])
-            return True
         except TypeError as e:
             if logger.getEffectiveLevel() == logging.DEBUG:
                 if not self.skip_invalid:
                     raise e
             return False
+
+        return True
+
+    def is_old(self, i):
+        if i.last_at and i.last_at < self.goback:
+            return True
 
     # silver-meme?
     def clean_indicator(self, i):
@@ -101,21 +120,17 @@ class FM(object):
 
         return i
 
-    def is_archived(self, indicator):
-        return self.archiver.search(indicator)
+    def is_archived(self, i):
+        if isinstance(self.archiver, NOOPArchiver):
+            return
 
-    def is_archived_with_log(self, i):
-        if self.is_archived(i):
+        if self.archiver.search(i):
             logger.debug('skipping: {}/{}/{}/{}'.format(i.indicator, i.provider, i.first_at, i.last_at))
             return True
-        else:
-            logger.debug('adding: {}/{}/{}/{}'.format(i.indicator, i.provider, i.first_at, i.last_at))
-            return False
 
-    def archive(self, indicator):
-        return self.archiver.create(indicator)
+        logger.debug('adding: {}/{}/{}/{}'.format(i.indicator, i.provider, i.first_at, i.last_at))
 
-    def process(self, rule, feed, parser_name, cli):
+    def process(self, rule, feed, parser_name, cli, limit=None):
         # detect and load the parser
         plugin_path = os.path.join(os.path.dirname(__file__), 'parsers')
         parser = load_plugin(plugin_path, parser_name)
@@ -126,19 +141,31 @@ class FM(object):
         indicators = (i for i in indicators if self.is_valid(i))
         indicators = (self.clean_indicator(i) for i in indicators)
 
+        # check to see if the indicator is too old
+        if self.goback:
+            indicators = (i for i in indicators if not self.is_old(i))
+
+        if not limit:
+            limit = rule.feeds[feed].get('limit')
+
+        if limit:
+            indicators = itertools.islice(indicators, int(limit))
+
+        indicators = (i for i in indicators if not self.is_archived(i))
+
         indicators_batches = chunk(indicators, int(FIREBALL_SIZE))
         for batch in indicators_batches:
             # send batch
+            if self.client and self.client != 'stdout':
+                self.client.indicators_create(batch)
 
             # archive
             self.archiver.begin()
             for i in batch:
-                if self.is_archived_with_log(i):
-                    continue
-
                 yield i.format_keys()
-                self.archive(i)
+                self.archiver.create(i)
 
+            # commit
             self.archiver.commit()
 
 
@@ -159,7 +186,6 @@ def main():
         parents=[p],
     )
 
-    p.add_argument('--client', default='stdout')
     p.add_argument("-r", "--rule", help="specify the rules directory or specific rules file [default: %(default)s",
                    default=FM_RULES_PATH)
 
@@ -181,6 +207,8 @@ def main():
     p.add_argument('--remember-path', help='specify remember db path [default: %(default)s', default=ARCHIVE_PATH)
     p.add_argument('--remember', help='remember what has been already processed', action='store_true')
 
+    p.add_argument('--client', default='stdout')
+
     args = p.parse_args()
 
     setup_logging(args)
@@ -196,7 +224,7 @@ def main():
     if args.remember:
         archiver = Archiver(dbfile=args.remember_path)
 
-    s = FM(archiver=archiver)
+    s = FM(archiver=archiver, client=args.client)
 
     data = None
     if select.select([sys.stdin, ], [], [], 0.0)[0]:
@@ -218,7 +246,6 @@ def main():
             cli.fetch()
 
         # decode the content and load the parser
-
         try:
             logger.debug('testing parser: %s' % cli.cache)
             parser_name = get_type(cli.cache)
@@ -232,9 +259,11 @@ def main():
         # process the indicators by passing the parser and file handle [or data]
         logger.info('processing: {} - {}:{}'.format(args.rule, r.provider, f))
         try:
-            for i in s.process(r, f, parser_name, cli):
-                if i:
-                    indicators.append(i)
+            for i in s.process(r, f, parser_name, cli, limit=args.limit):
+                if not i:
+                    continue
+
+                indicators.append(i)
 
         except Exception as e:
             logger.error(e)
