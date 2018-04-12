@@ -61,7 +61,7 @@ class FM(object):
             if not c:
                 raise RuntimeError("Unable to load plugin: {}".format(c))
 
-            self.client = c
+            self.client = c.Plugin()
 
     def is_valid(self, i):
         try:

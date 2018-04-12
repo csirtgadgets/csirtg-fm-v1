@@ -1,40 +1,27 @@
 from csirtgsdk.client import Client as CSIRTGClient
 from csirtgsdk.indicator import Indicator
-import csirtg_indicator
-from csirtg_fm.client.plugin import Client
-from pprint import pprint
-import os
 
 
-class _Csirtg(Client):
-
+class _Csirtg(object):
     def __init__(self, **kwargs):
-        super(_Csirtg, self).__init__(**kwargs)
+        self.handle = CSIRTGClient()
 
-    def indicators_search(self, filters):
-        handle = CSIRTGClient()
-        return []
+    def ping(self):
+        rv = self.handle.get('https://csirtg.io/api')
+        return True
 
     def indicators_create(self, data):
-        handle = CSIRTGClient()
-
         if not isinstance(data, list):
             data = [data]
 
         indicators = []
         for x in data:
-            d = {}
-
-            if isinstance(x, csirtg_indicator.Indicator):
-                d = x.__dict__()
-            else:
-                d = x
-
+            d = x.__dict__()
             d['feed'] = self.feed
             d['user'] = self.user
 
             i = Indicator(
-                handle,
+                self.handle,
                 d
             )
 
@@ -43,6 +30,3 @@ class _Csirtg(Client):
 
         assert len(indicators) > 0
         return indicators
-
-
-Plugin = _Csirtg
