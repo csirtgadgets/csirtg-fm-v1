@@ -41,7 +41,10 @@ def load_rules(rule, feed=None):
     if feed:
         # replace the feeds dict with the single feed
         # raises KeyError if it doesn't exist
-        rule.feeds = {feed: rule.feeds[feed]}
+        try:
+            rule.feeds = {feed: rule.feeds[feed]}
+        except Exception:
+            yield None, None
 
     for f in rule.feeds:
         yield rule, f
