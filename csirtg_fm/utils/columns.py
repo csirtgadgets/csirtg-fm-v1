@@ -5,6 +5,7 @@ from csirtg_indicator import Indicator
 from pprint import pprint
 import re
 
+
 def is_timestamp(s):
     try:
         t = parse_timestamp(s)
@@ -13,7 +14,7 @@ def is_timestamp(s):
         pass
 
 
-def get_indicator(l):
+def get_indicator(l, hints=None):
     i = {}
 
     # step 1, detect datatypes
@@ -49,7 +50,10 @@ def get_indicator(l):
             continue
 
         if isinstance(e, (str, bytes)):
-            i[e] = 'string'
+            if e.lower() == hints[0].lower() or e.lower() == hints[1].lower():
+                i[e] = 'description'
+            else:
+                i[e] = 'string'
 
     i2 = Indicator()
     timestamps = []
@@ -76,8 +80,12 @@ def get_indicator(l):
             ports.append(e)
             continue
 
+        if i[e] == 'description':
+            i2.description = e
+            continue
+
         if i[e] == 'string':
-            if re.match(r'[A-Z]+', e):
+            if re.match(r'[0-9A-Za-z\.\s\/]+', e):
                 i2.asn_desc = e
                 continue
 
@@ -85,7 +93,7 @@ def get_indicator(l):
                 i2.tags = [e]
                 continue
 
-            if ' ' in e and 5 <= len(e):
+            if ' ' in e and 5 <= len(e) and not i2.asn_desc:
                 i2.description = e
                 continue
 

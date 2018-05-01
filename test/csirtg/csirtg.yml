@@ -1,15 +1,13 @@
 feeds:
   # A feed of IP addresses block by a firewall (e.g. port scanners)
-  darknet:
-    remote: https://csirtg.io/api/users/csirtgadgets/feeds/port-scanners.csv
+  csirtgadets/darknet:
     defaults:
       tags:
         - scanner
 
   # A feed of URLs seen in the message body of UCE email. Do not alert or block
   # on these urls without additional post-processing.
-  uce-urls:
-    remote: https://csirtg.io/api/users/csirtgadgets/feeds/uce-urls.csv
+  csirtgadets/uce-urls:
     defaults:
       tags:
         - uce
@@ -17,8 +15,7 @@ feeds:
 
   # A feed of email addresses seen in UCE email. Do not alert or block on these
   # email addresses without additional post-processing.
-  uce-email-address:
-    remote: https://csirtg.io/api/users/csirtgadgets/feeds/uce-email-addresses.csv
+  csirtgadets/uce-email-address:
     defaults:
       tags:
         - uce
@@ -26,8 +23,7 @@ feeds:
 
   # A feed of IP addresses seen delivering UCE email. This could be a machine that
   # is compromised or a user account has been compromised and used to send UCE.
-  uce-ip:
-    remote: https://csirtg.io/api/users/csirtgadgets/feeds/uce-ip.csv
+  csirtgadets/uce-ip:
     defaults:
       tags:
         - uce

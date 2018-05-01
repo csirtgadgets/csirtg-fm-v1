@@ -201,7 +201,7 @@ def main():
     p.add_argument("-f", "--feed", help="specify the feed to process")
 
     p.add_argument("--limit", help="limit the number of records processed [default: %(default)s]",
-                   default=None)
+                   default=25)
 
     p.add_argument('--no-fetch', help='do not re-fetch if the cache exists', action='store_true')
     p.add_argument('--no-verify-ssl', help='turn TLS/SSL verification OFF', action='store_true')
@@ -258,7 +258,7 @@ def main():
             print("\n")
             print('Feed not found: %s' % args.feed)
             print("\n")
-            raise SystemExit()
+            raise SystemExit
 
         # detect which client we should be using
 
@@ -305,6 +305,10 @@ def main():
     if args.client == 'stdout':
         for l in FORMATS[args.format](data=indicators, cols=args.fields.split(',')):
             print(l)
+
+        raise SystemExit
+
+
 
 
 if __name__ == "__main__":

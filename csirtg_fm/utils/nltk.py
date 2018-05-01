@@ -2,11 +2,10 @@ from collections import defaultdict
 from pprint import pprint
 
 import arrow
-from nltk.tokenize import wordpunct_tokenize
+from nltk.tokenize import wordpunct_tokenize, casual_tokenize, regexp_tokenize
 
 from csirtg_indicator.utils import resolve_itype
 from csirtg_indicator import Indicator
-from csirtg_indicator.exceptions import InvalidIndicator
 
 KNOWN_SEPERATORS = set([',', '|', "\t", ';'])
 IGNORE_SEPARATORS = set(['.', '/'])
@@ -14,7 +13,7 @@ IGNORE_SEPARATORS = set(['.', '/'])
 
 def top_tokens(text):
     freq_dict = defaultdict(int)
-    tokens = wordpunct_tokenize(text)
+    tokens = casual_tokenize(text)
 
     for token in tokens:
         freq_dict[token] += 1
@@ -61,7 +60,7 @@ def text_to_list(text, known_only=True):
                     if i:
                         indicator.indicator = e
                         indicator.itype = i
-                except InvalidIndicator:
+                except TypeError:
                     pass
 
                 try:

@@ -124,6 +124,43 @@ def get_type(f_name, mime=None):
         return 'tsv'
 
 
+def peek(f, lines=5, delim=','):
+    n = lines
+    from collections import defaultdict
+    freq_dict = defaultdict(int)
+
+    for l in f.readlines():
+        if l.startswith('#'):
+            continue
+
+        for e in l.split(delim):
+            if e == '':
+                continue
+
+            if e == "\n":
+                continue
+
+            if e in ['ipv4', 'ipv6', 'url', 'fqdn']:
+                continue
+
+            # we don't care if it's an indicator
+            from csirtg_indicator import resolve_itype
+            try:
+                resolve_itype(e)
+            except:
+                pass
+            else:
+                continue
+
+            freq_dict[e] += 1
+
+        n = n-1
+        if n == 0:
+            break
+
+    return sorted(freq_dict, reverse=True)
+
+
 if __name__ == "__main__":
     f = sys.argv[1]
     with open(f) as FILE:

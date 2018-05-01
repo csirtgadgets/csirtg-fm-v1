@@ -17,6 +17,10 @@ class Delim(Parser):
 
     def process(self):
         with open(self.cache, 'r') as cache:
+            from ..utils.content import peek
+            hints = peek(cache)
+            pprint(hints)
+            cache.seek(0)
             for l in cache.readlines():
                 if self.ignore(l):  # comment or skip
                     continue
@@ -24,17 +28,15 @@ class Delim(Parser):
                 l = l.rstrip()
                 l = l.lstrip()
 
-                logger.debug(l)
                 m = self.pattern.split(l)
 
-                i = get_indicator(m)
+                i = get_indicator(m, hints=hints)
 
                 if not i.itype:
                     logger.error("unable to parse line: \n%s" % l)
                     continue
 
                 self.set_defaults(i)
-                logger.debug(i)
 
                 yield i.__dict__()
 
