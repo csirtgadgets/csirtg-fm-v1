@@ -5,15 +5,13 @@ arrow>=0.6.0
 python-magic>=0.4.6
 pyaml>=15.8.2
 chardet>=3.0
-# bug affecting bs4, py2 and cgmail
-#html5lib==1.0b8
 lxml>=4.2
 
 SQLAlchemy>=1.2
 tornado>=5.0
 nltk>=3.2,<3.3
 
-#csirtg_indicator>=0.0.0b25
+#csirtg_indicator>=1.0
 #https://github.com/csirtgadgets/silver-meme/archive/master.zip
 csirtgsdk>=0.0.0a9
 csirtg_mail>=0.0.0a9

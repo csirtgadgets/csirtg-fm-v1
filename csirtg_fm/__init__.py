@@ -23,7 +23,6 @@ from csirtg_fm.utils import setup_logging, get_argument_parser, load_plugin, set
 from csirtg_fm.exceptions import RuleUnsupported
 from csirtg_fm.constants import FIREBALL_SIZE
 from csirtg_fm.utils.content import get_type
-from .clients.http import Client
 from .rule import load_rules
 from .archiver import Archiver, NOOPArchiver
 
@@ -31,6 +30,7 @@ FORMAT = os.getenv('CSIRTG_FM_FORMAT', 'table')
 STDOUT_FIELDS = COLUMNS
 ARCHIVE_PATH = os.environ.get('CSIRTG_SMRT_ARCHIVE_PATH', CACHE_PATH)
 ARCHIVE_PATH = os.path.join(ARCHIVE_PATH, 'fm.db')
+GOBACK_DAYS = 3
 
 # http://python-3-patterns-idioms-test.readthedocs.org/en/latest/Factory.html
 # https://gist.github.com/pazdera/1099559
@@ -130,14 +130,23 @@ class FM(object):
 
         logger.debug('adding: {}/{}/{}/{}'.format(i.indicator, i.provider, i.first_at, i.last_at))
 
-    def process(self, rule, feed, parser_name, cli, limit=None):
-        # detect and load the parser
-        plugin_path = os.path.join(os.path.dirname(__file__), 'parsers')
-        parser = load_plugin(plugin_path, parser_name)
-        parser = parser.Plugin(rule=rule, feed=feed, cache=cli.cache)
+    def fetch_csirtg(self, f, limit=250):
+        from .clients.csirtg import Client
+        cli = Client()
+        user, feed = f.split('/')
+        return cli.fetch(user, feed, limit=limit)
 
-        # bring up the pipeline
-        indicators = parser.process()
+    def process(self, rule, feed, parser_name, cli, limit=None, indicators=[]):
+
+        if parser_name != 'csirtg':
+            # detect and load the parser
+            plugin_path = os.path.join(os.path.dirname(__file__), 'parsers')
+            parser = load_plugin(plugin_path, parser_name)
+            parser = parser.Plugin(rule=rule, feed=feed, cache=cli.cache)
+
+            # bring up the pipeline
+            indicators = parser.process()
+
         indicators = (i for i in indicators if self.is_valid(i))
         indicators = (self.clean_indicator(i) for i in indicators)
 
@@ -209,6 +218,9 @@ def main():
 
     p.add_argument('--client', default='stdout')
 
+    p.add_argument('--goback', help='specify default number of days to start out at [default %(default)s]',
+                   default=GOBACK_DAYS)
+
     args = p.parse_args()
 
     setup_logging(args)
@@ -224,7 +236,11 @@ def main():
     if args.remember:
         archiver = Archiver(dbfile=args.remember_path)
 
-    s = FM(archiver=archiver, client=args.client)
+    goback = args.goback
+    if goback:
+        goback = arrow.utcnow().replace(days=-int(goback))
+
+    s = FM(archiver=archiver, client=args.client, goback=goback)
 
     data = None
     if select.select([sys.stdin, ], [], [], 0.0)[0]:
@@ -234,32 +250,48 @@ def main():
     if args.no_fetch:
         fetch = False
 
+    data = []
     indicators = []
 
     for r, f in load_rules(args.rule, feed=args.feed):
+        if not f:
+            print("\n")
+            print('Feed not found: %s' % args.feed)
+            print("\n")
+            raise SystemExit()
+
         # detect which client we should be using
 
-        cli = Client(r, f)
+        if '/' in f:
+            parser_name = 'csirtg'
+            cli = None
+            for i in s.fetch_csirtg(f, limit=args.limit):
+                data.append(i)
 
-        # fetch the feeds
-        if fetch:
-            cli.fetch()
+        else:
+            from .clients.http import Client
+            cli = Client(r, f)
 
-        # decode the content and load the parser
+            # fetch the feeds
+            if fetch:
+                cli.fetch()
+
+            # decode the content and load the parser
+            try:
+                logger.debug('testing parser: %s' % cli.cache)
+                parser_name = get_type(cli.cache)
+                logger.debug('detected parser: %s' % parser_name)
+            except Exception as e:
+                logger.debug(e)
+
+            if not parser_name:
+                parser_name = r.feeds[f].get('parser') or r.parser or 'pattern'
+
+                # process the indicators by passing the parser and file handle [or data]
+                logger.info('processing: {} - {}:{}'.format(args.rule, r.provider, f))
+
         try:
-            logger.debug('testing parser: %s' % cli.cache)
-            parser_name = get_type(cli.cache)
-            logger.debug('detected parser: %s' % parser_name)
-        except Exception as e:
-            logger.debug(e)
-
-        if not parser_name:
-            parser_name = r.feeds[f].get('parser') or r.parser or 'pattern'
-
-        # process the indicators by passing the parser and file handle [or data]
-        logger.info('processing: {} - {}:{}'.format(args.rule, r.provider, f))
-        try:
-            for i in s.process(r, f, parser_name, cli, limit=args.limit):
+            for i in s.process(r, f, parser_name, cli, limit=args.limit, indicators=data):
                 if not i:
                     continue
 
