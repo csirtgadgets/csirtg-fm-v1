@@ -12,6 +12,10 @@ import arrow
 import itertools
 from time import sleep
 
+from csirtg_urlsml import predict as predict_url
+from csirtg_domainsml import predict as predict_domain
+from csirtg_ipsml import predict as predict_ip
+
 from csirtg_indicator.utils import resolve_itype, normalize_itype
 from csirtg_indicator.format import FORMATS
 from csirtg_indicator.constants import COLUMNS
@@ -83,9 +87,6 @@ class FM(object):
         if isinstance(i, dict):
             i = Indicator(**i)
 
-        if not i.first_at:
-            i.first_at = i.last_at
-
         if not i.reported_at:
             i.reported_at = arrow.utcnow().datetime
 
@@ -95,6 +96,9 @@ class FM(object):
         if not i.tlp:
             i.tlp = 'white'
 
+        return i
+
+    def confidence(self, i):
         if i.confidence:
             return i
 
@@ -112,11 +116,41 @@ class FM(object):
             elif len(i.tags) > 1:
                 i.confidence = 4
 
-        elif i.itype == 'url' and len(i.tags) > 1:
+        elif i.itype == 'url' and len(i.tags) > 1 or 'phishing' in i.tags:
             i.confidence = 4
 
         elif i.itype == 'email' and len(i.tags) > 1:
             i.confidence = 4
+
+        if i.probability and i.probability >= 84:
+            i.confidence = 4
+
+        return i
+
+    def predict(self, i):
+        if i.itype == 'ipv4':
+            hour = i.reported_at.hour
+            if i.last_at:
+                hour = i.last_at.hour
+
+            p = predict_ip(i.indicator, hour)
+            if p:
+                i.probability = 84.0
+
+            return i
+
+        elif i.itype == 'fqdn':
+            fn = predict_domain
+
+        elif i.itype == 'url':
+            fn = predict_url
+
+        else:
+            return i
+
+        p = fn(i.indicator)
+        if p:
+            i.probability = 84.0
 
         return i
 
@@ -161,6 +195,9 @@ class FM(object):
             indicators = itertools.islice(indicators, int(limit))
 
         indicators = (i for i in indicators if not self.is_archived(i))
+
+        indicators = (self.confidence(i) for i in indicators)
+        indicators = (self.predict(i) for i in indicators)
 
         indicators_batches = chunk(indicators, int(FIREBALL_SIZE))
         for batch in indicators_batches:

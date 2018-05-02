@@ -19,7 +19,6 @@ class Delim(Parser):
         with open(self.cache, 'r') as cache:
             from ..utils.content import peek
             hints = peek(cache)
-            pprint(hints)
             cache.seek(0)
             for l in cache.readlines():
                 if self.ignore(l):  # comment or skip

@@ -92,7 +92,13 @@ class Parser(object):
             return
 
         for k, v in self._defaults().items():
+            if ',' in v:
+                v = v.replace(' ', '')
+                v = v.split(',')
             setattr(i, k, v)
+
+        if not i.reference or i.reference == '':
+            i.reference = self.rule.feeds[self.feed].get('remote')
 
     def process(self):
         raise NotImplementedError

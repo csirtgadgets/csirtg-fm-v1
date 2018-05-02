@@ -69,7 +69,7 @@ def get_indicator(l, hints=None):
             continue
 
         if i[e] == 'timestamp':
-            timestamps.append(e)
+            timestamps.append(parse_timestamp(e))
             continue
 
         if i[e] == 'float':
@@ -100,10 +100,10 @@ def get_indicator(l, hints=None):
     timestamps = sorted(timestamps, reverse=True)
 
     if len(timestamps) > 0:
-        i2.lasttime = timestamps[0]
+        i2.last_at = timestamps[0]
 
     if len(timestamps) > 1:
-        i2.firsttime = timestamps[1]
+        i2.first_at = timestamps[1]
 
     if len(ports) > 0:
         if len(ports) == 1:

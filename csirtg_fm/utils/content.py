@@ -2,6 +2,7 @@ import magic
 import sys
 from pprint import pprint
 import re
+from csirtg_indicator.utils import resolve_itype
 
 RE_SUPPORTED_DECODE = re.compile("zip|lzf|lzma|xz|lzop")
 
@@ -11,6 +12,26 @@ f = sys.argv[1]
 def _is_ascii(f, mime):
     if mime.startswith(('text/plain', 'ASCII text')):
         return True
+
+
+def _is_flat(f, mime):
+    if not _is_ascii(f, mime):
+        return
+
+    n = 5
+    for l in f.readlines():
+        l = l.rstrip("\n")
+
+        try:
+            resolve_itype(l)
+        except:
+            return False
+
+        n -= 1
+        if n == 0:
+            break
+
+    return 'csv'
 
 
 def _is_xml(f, mime):
@@ -108,6 +129,7 @@ def get_type(f_name, mime=None):
         _is_xml,
         _is_json,
         _is_delimited,
+        _is_flat,
     ]
 
     t = None

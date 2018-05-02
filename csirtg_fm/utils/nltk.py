@@ -37,8 +37,6 @@ def text_to_list(text, known_only=True):
 
     if known_only:
         if separator not in KNOWN_SEPERATORS:
-
-            pprint(top)
             raise SystemError('separator not in known list: {}'.format(separator))
 
     ret = []
