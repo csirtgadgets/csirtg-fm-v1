@@ -12,13 +12,14 @@ class Delim(Parser):
     def __init__(self, **kwargs):
         super(Delim, self).__init__(**kwargs)
 
-        if self.pattern and isinstance(self.pattern, str):
-            self.pattern = re.compile(self.pattern)
+        if self.delim and isinstance(self.delim, str):
+            self.pattern = re.compile(self.delim)
 
     def process(self):
+        count = 0
         with open(self.cache, 'r') as cache:
             from ..utils.content import peek
-            hints = peek(cache)
+            hints = peek(cache, lines=25, delim=self.delim)
             cache.seek(0)
             for l in cache.readlines():
                 if self.ignore(l):  # comment or skip
@@ -27,6 +28,7 @@ class Delim(Parser):
                 l = l.rstrip()
                 l = l.lstrip()
 
+                logger.debug(l)
                 m = self.pattern.split(l)
 
                 i = get_indicator(m, hints=hints)
@@ -38,6 +40,12 @@ class Delim(Parser):
                 self.set_defaults(i)
 
                 yield i.__dict__()
+
+                logger.debug(i)
+
+                count += 1
+                if self.limit and int(self.limit) == count:
+                    return
 
 
 Plugin = Delim

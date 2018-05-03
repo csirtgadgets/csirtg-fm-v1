@@ -176,7 +176,7 @@ class FM(object):
             # detect and load the parser
             plugin_path = os.path.join(os.path.dirname(__file__), 'parsers')
             parser = load_plugin(plugin_path, parser_name)
-            parser = parser.Plugin(rule=rule, feed=feed, cache=cli.cache)
+            parser = parser.Plugin(rule=rule, feed=feed, cache=cli.cache, limit=limit)
 
             # bring up the pipeline
             indicators = parser.process()

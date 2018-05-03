@@ -1,4 +1,5 @@
 import gzip
+import os.path
 from zipfile import ZipFile
 
 
@@ -19,26 +20,25 @@ def decompress_gzip(f):
 def decompress_zip(zipfile):
     with ZipFile(zipfile) as f:
         for m in f.infolist():
+            fname = os.path.join(os.path.dirname(zipfile), m.filename)
             with f.open(m.filename) as zip:
-                in_file = zip.read()
+                # store uncompressed file data from 's' variable
+                with open(fname, 'wb') as f:
+                    f.write(zip.read())
 
-            s = in_file.read()
-
-            # store uncompressed file data from 's' variable
-            with open(m.filename, 'w') as f:
-                f.write(s)
+            yield fname
 
 
-def get_lines_gzip(file):
-
-    with gzip.open(file, 'rb') as f:
-        for l in f:
-            yield l
-
-
-def get_lines_zip(file):
-    with ZipFile(file) as f:
-        for m in f.infolist():
-            with f.open(m.filename) as zip:
-                for l in zip.readlines():
-                    yield l
+# def get_lines_gzip(file):
+#
+#     with gzip.open(file, 'rb') as f:
+#         for l in f:
+#             yield l
+#
+#
+# def get_lines_zip(file):
+#     with ZipFile(file) as f:
+#         for m in f.infolist():
+#             with f.open(m.filename) as zip:
+#                 for l in zip.readlines():
+#                     yield l

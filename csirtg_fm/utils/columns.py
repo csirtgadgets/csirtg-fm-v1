@@ -28,7 +28,7 @@ def get_indicator(l, hints=None):
 
         t = None
         try:
-            t = resolve_itype(e)
+            t = resolve_itype(e.rstrip('/'))
             # 25553.0 ASN formats trip up FQDN resolve itype
             if t and not (t == 'fqdn' and re.match('^\d+\.[0-9]$', e)):
                 i[e] = 'indicator'
@@ -50,9 +50,15 @@ def get_indicator(l, hints=None):
             continue
 
         if isinstance(e, (str, bytes)):
-            if e.lower() == hints[0].lower() or e.lower() == hints[1].lower():
-                i[e] = 'description'
-            else:
+            for ii in range(0, 25):
+                if len(hints) == ii:
+                    break
+
+                if e.lower() == hints[ii].lower():
+                    i[e] = 'description'
+                    break
+
+            if not i.get(e):
                 i[e] = 'string'
 
     i2 = Indicator()
@@ -65,7 +71,10 @@ def get_indicator(l, hints=None):
             continue
 
         if i[e] == 'indicator':
-            i2.indicator = e
+            if i2.indicator:
+                i2.reference = e
+            else:
+                i2.indicator = e
             continue
 
         if i[e] == 'timestamp':

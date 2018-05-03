@@ -50,8 +50,8 @@ class Parser(object):
         elif self.rule.line_filter:
             self.line_filter = self.rule.line_filter
 
-        # if self.line_filter:
-        #     self.line_filter = re.compile(self.line_filter)
+        if self.line_filter:
+            self.line_filter = re.compile(self.line_filter)
 
         self.line_count = 0
 

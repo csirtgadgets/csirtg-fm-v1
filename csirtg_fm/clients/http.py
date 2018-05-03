@@ -11,6 +11,8 @@ from time import sleep
 import arrow
 import requests
 
+from ..utils.content import get_mimetype
+from ..utils.decoders import decompress_zip
 
 RE_SUPPORTED_DECODE = re.compile("zip|lzf|lzma|xz|lzop")
 RE_CACHE_TYPES = re.compile('([\w.-]+\.(csv|zip|txt|gz))$')
@@ -88,6 +90,15 @@ class Client(object):
         else:
             self.cache = os.path.join(self.dir, self.feed)
 
+        # test to see if we've decompressed a similarly named text file
+        if self.cache.endswith('.zip'):
+            _, f = os.path.split(self.cache)
+            f, t = f.split('.')
+            f = '%s.txt' % f
+            f = os.path.join(_, f)
+            if os.path.exists(f):
+                self.cache = f
+
         logger.debug('CACHE %s' % self.cache)
 
     def _cache_modified(self):
@@ -140,22 +151,19 @@ class Client(object):
             for block in resp.iter_content(1024):
                 f.write(block)
 
-    def _cache_decode(self):
-        from ..utils.content import get_mimetype
-        from ..utils.decoders import decompress_gzip, decompress_zip
-        ftype = get_mimetype(self.cache)
-        if ftype.startswith('application/x-gzip') or ftype.startswith('application/gzip'):
-            self.cache = decompress_gzip(self.cache)
+        self._cache_decode()
 
-        elif ftype == "application/zip":
-            self.cache = decompress_zip(self.cache)
+    def _cache_decode(self):
+        ftype = get_mimetype(self.cache)
+
+        if ftype == "application/zip":
+            for fname in decompress_zip(self.cache):
+                self.cache = os.path.join(os.path.dirname(self.cache), fname)
 
     def fetch(self):
         if self._cache_size() == 0:
             logger.debug('cache size is 0, downloading...')
             self._cache_write(self.handle)
-            self._cache_decode()
-            
             return
 
         logger.debug('checking HEAD')
@@ -182,5 +190,3 @@ class Client(object):
 
         logger.debug("refreshing cache...")
         self._cache_write(self.handle)
-
-        self._cache_decode()
