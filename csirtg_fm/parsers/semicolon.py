@@ -4,7 +4,7 @@ from csirtg_fm.parsers.delim import Delim
 class Semicolon(Delim):
 
     def __init__(self, **kwargs):
-        self.pattern = ";\s+"
+        self.delim = ";\s+"
 
         super(Semicolon, self).__init__(**kwargs)
 

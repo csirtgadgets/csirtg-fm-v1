@@ -33,8 +33,10 @@ class Pattern(Parser):
             self.cols = self.cols.split(',')
 
     def process(self):
-        with open(self.cache, 'r') as cache:
+        with open(self.cache, 'rb') as cache:
             for l in cache.readlines():
+                l = l.decode('utf-8')
+
                 if self.ignore(l):  # comment or skip
                     continue
 

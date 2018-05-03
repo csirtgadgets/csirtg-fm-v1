@@ -176,7 +176,7 @@ class FM(object):
             # detect and load the parser
             plugin_path = os.path.join(os.path.dirname(__file__), 'parsers')
             parser = load_plugin(plugin_path, parser_name)
-            parser = parser.Plugin(rule=rule, feed=feed, cache=cli.cache)
+            parser = parser.Plugin(rule=rule, feed=feed, cache=cli.cache, limit=limit)
 
             # bring up the pipeline
             indicators = parser.process()
@@ -310,8 +310,7 @@ def main():
             cli = Client(r, f)
 
             # fetch the feeds
-            if fetch:
-                cli.fetch()
+            cli.fetch(fetch=fetch)
 
             # decode the content and load the parser
             try:
@@ -320,6 +319,9 @@ def main():
                 logger.debug('detected parser: %s' % parser_name)
             except Exception as e:
                 logger.debug(e)
+
+            if r.feeds[f].get('pattern'):
+                parser_name = 'pattern'
 
             if not parser_name:
                 parser_name = r.feeds[f].get('parser') or r.parser or 'pattern'
