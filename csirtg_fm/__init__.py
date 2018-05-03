@@ -310,8 +310,7 @@ def main():
             cli = Client(r, f)
 
             # fetch the feeds
-            if fetch:
-                cli.fetch()
+            cli.fetch(fetch=fetch)
 
             # decode the content and load the parser
             try:

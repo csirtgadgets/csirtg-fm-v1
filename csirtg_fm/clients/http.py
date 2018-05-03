@@ -160,12 +160,16 @@ class Client(object):
             for fname in decompress_zip(self.cache):
                 self.cache = os.path.join(os.path.dirname(self.cache), fname)
 
-    def fetch(self):
+    def fetch(self, fetch=True):
         if self._cache_size() == 0:
             logger.debug('cache size is 0, downloading...')
             self._cache_write(self.handle)
             return
 
+        if not fetch and os.path.exists(self.cache):
+            logger.debug('skipping fetch..')
+            return
+        
         logger.debug('checking HEAD')
 
         auth = False
