@@ -321,6 +321,9 @@ def main():
             except Exception as e:
                 logger.debug(e)
 
+            if r.feeds[f].get('pattern'):
+                parser_name = 'pattern'
+
             if not parser_name:
                 parser_name = r.feeds[f].get('parser') or r.parser or 'pattern'
 

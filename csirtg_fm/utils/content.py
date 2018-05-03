@@ -11,7 +11,7 @@ f = sys.argv[1]
 
 def _is_ascii(f, mime):
     if mime.startswith(('text/plain', 'ASCII text')):
-        return True
+        return 'pattern'
 
 
 def _is_flat(f, mime):
@@ -27,8 +27,6 @@ def _is_flat(f, mime):
             continue
 
         l = l.rstrip("\n")
-        #l = re.match(r'([^\s]+)', l)
-        #l = l[0].lstrip('*.')
 
         try:
             resolve_itype(l)
@@ -138,6 +136,7 @@ def get_type(f_name, mime=None):
         _is_json,
         _is_delimited,
         _is_flat,
+        _is_ascii,
     ]
 
     t = None
