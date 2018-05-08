@@ -1,4 +1,4 @@
-include 'csirtg_smrt'
+include 'csirtg_fm'
 include versioneer.py
 include README README.md COPYING LICENSE
 include MANIFEST.in
@@ -16,4 +16,4 @@ recursive-exclude * *.pyc
 recursive-exclude * *.pyo
 recursive-exclude * *.orig
 recursive-exclude packaging *
-include csirtg_smrt/_version.py
+include csirtg_fm/_version.py

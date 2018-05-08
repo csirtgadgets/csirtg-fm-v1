@@ -3,7 +3,7 @@ try:
 except ImportError:
     raise ImportError('Requires elasticsearch')
 
-from csirtg_smrt.client.plugin import Client
+from csirtg_fm.client.plugin import Client
 from pprint import pprint
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl import DocType, String, Date, Integer, Float, Ip, GeoPoint, Index, Mapping
