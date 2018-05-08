@@ -4,7 +4,7 @@ import versioneer
 import sys
 
 import sys
-if sys.version_info < (3,6):
+if sys.version_info < (3,5):
     sys.exit('Sorry, Python < 3,6 is not supported')
 
 # vagrant doesn't appreciate hard-linking
