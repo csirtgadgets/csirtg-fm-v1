@@ -2,22 +2,14 @@
 
 import logging
 import os.path
-import textwrap
-from argparse import ArgumentParser
-from argparse import RawDescriptionHelpFormatter
-from pprint import pprint
-import sys
-import select
 import arrow
 import itertools
-from time import sleep
 
 from csirtg_urlsml import predict as predict_url
 from csirtg_domainsml import predict as predict_domain
 from csirtg_ipsml import predict as predict_ip
 
-from csirtg_indicator.utils import resolve_itype, normalize_itype
-from csirtg_indicator.format import FORMATS
+from csirtg_indicator.utils import resolve_itype
 from csirtg_indicator.constants import COLUMNS
 from csirtg_indicator import Indicator
 
@@ -213,142 +205,3 @@ class FM(object):
 
             # commit
             self.archiver.commit()
-
-
-def main():
-    p = get_argument_parser()
-    p = ArgumentParser(
-        description=textwrap.dedent('''\
-        Env Variables:
-            CSIRTG_RUNTIME_PATH
-            
-
-        example usage:
-            $ csirtg-fm --rule rules/default
-            $ csirtg-fm --rule default/csirtg.yml --feed port-scanners --remote http://localhost:5000
-        '''),
-        formatter_class=RawDescriptionHelpFormatter,
-        prog='csirtg-fm',
-        parents=[p],
-    )
-
-    p.add_argument("-r", "--rule", help="specify the rules directory or specific rules file [default: %(default)s",
-                   default=FM_RULES_PATH)
-
-    p.add_argument("-f", "--feed", help="specify the feed to process")
-
-    p.add_argument("--limit", help="limit the number of records processed [default: %(default)s]",
-                   default=25)
-
-    p.add_argument('--no-fetch', help='do not re-fetch if the cache exists', action='store_true')
-    p.add_argument('--no-verify-ssl', help='turn TLS/SSL verification OFF', action='store_true')
-
-    p.add_argument('--skip-invalid', help="skip invalid indicators in DEBUG (-d) mode", action="store_true")
-    p.add_argument('--skip-broken', help='skip seemingly broken feeds', action='store_true')
-
-    p.add_argument('--format', help='specify output format [default: %(default)s]"', default=FORMAT,
-                   choices=FORMATS)
-    p.add_argument('--fields', help='specify fields for stdout [default %(default)s]"', default=','.join(STDOUT_FIELDS))
-
-    p.add_argument('--remember-path', help='specify remember db path [default: %(default)s', default=ARCHIVE_PATH)
-    p.add_argument('--remember', help='remember what has been already processed', action='store_true')
-
-    p.add_argument('--client', default='stdout')
-
-    p.add_argument('--goback', help='specify default number of days to start out at [default %(default)s]',
-                   default=GOBACK_DAYS)
-
-    args = p.parse_args()
-
-    setup_logging(args)
-
-    logger.info('loglevel is: {}'.format(logging.getLevelName(logger.getEffectiveLevel())))
-
-    # we're running as a service
-    setup_signals(__name__)
-    
-    logger.info('starting...')
-
-    archiver = NOOPArchiver()
-    if args.remember:
-        archiver = Archiver(dbfile=args.remember_path)
-
-    goback = args.goback
-    if goback:
-        goback = arrow.utcnow().replace(days=-int(goback))
-
-    s = FM(archiver=archiver, client=args.client, goback=goback)
-
-    data = None
-    if select.select([sys.stdin, ], [], [], 0.0)[0]:
-        data = sys.stdin.read()
-
-    fetch = True
-    if args.no_fetch:
-        fetch = False
-
-    data = []
-    indicators = []
-
-    for r, f in load_rules(args.rule, feed=args.feed):
-        if not f:
-            print("\n")
-            print('Feed not found: %s' % args.feed)
-            print("\n")
-            raise SystemExit
-
-        # detect which client we should be using
-
-        if '/' in f:
-            parser_name = 'csirtg'
-            cli = None
-            for i in s.fetch_csirtg(f, limit=args.limit):
-                data.append(i)
-
-        else:
-            from .clients.http import Client
-            cli = Client(r, f)
-
-            # fetch the feeds
-            cli.fetch(fetch=fetch)
-
-            # decode the content and load the parser
-            try:
-                logger.debug('testing parser: %s' % cli.cache)
-                parser_name = get_type(cli.cache)
-                logger.debug('detected parser: %s' % parser_name)
-            except Exception as e:
-                logger.debug(e)
-
-            if r.feeds[f].get('pattern'):
-                parser_name = 'pattern'
-
-            if not parser_name:
-                parser_name = r.feeds[f].get('parser') or r.parser or 'pattern'
-
-                # process the indicators by passing the parser and file handle [or data]
-                logger.info('processing: {} - {}:{}'.format(args.rule, r.provider, f))
-
-        try:
-            for i in s.process(r, f, parser_name, cli, limit=args.limit, indicators=data):
-                if not i:
-                    continue
-
-                indicators.append(i)
-
-        except Exception as e:
-            logger.error(e)
-            import traceback
-            traceback.print_exc()
-
-    if args.client == 'stdout':
-        for l in FORMATS[args.format](data=indicators, cols=args.fields.split(',')):
-            print(l)
-
-        raise SystemExit
-
-
-
-
-if __name__ == "__main__":
-    main()

@@ -58,8 +58,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'csirtg-smrt=csirtg_fm:main',
-            'csirtg-fm=csirtg_fm:main'
+            'csirtg-fm=csirtg_fm.cli:main'
         ]
     },
 )
