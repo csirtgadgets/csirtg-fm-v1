@@ -59,13 +59,19 @@ class Client(object):
 
         if not self.provider:
             match = re.search(RE_FQDN, self.remote)
-            self.provider = match[0]
+            try:
+                self.provider = match[0]
+            except TypeError:
+                self.provider = match.group(0)
 
             if not self.rule.defaults:
                 self.rule.defaults = {}
 
             if not self.rule.defaults.get('provider'):
-                self.rule.defaults['provider'] = match[0]
+                try:
+                    self.rule.defaults['provider'] = match[0]
+                except TypeError:
+                    self.rule.defaults['provider'] = match.group(0)
 
     def _init_paths(self, feed):
         if os.path.isfile(self.remote):
