@@ -68,6 +68,10 @@ class Client(object):
                 self.rule.defaults['provider'] = match[0]
 
     def _init_paths(self, feed):
+        if os.path.isfile(self.remote):
+            self.cache = self.remote
+            return
+
         self.dir = os.path.join(self.cache, self.provider)
         logger.debug(self.dir)
 

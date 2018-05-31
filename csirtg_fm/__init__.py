@@ -3,6 +3,7 @@
 import logging
 import os.path
 import arrow
+from pprint import pprint
 import itertools
 
 from csirtg_urlsml import predict as predict_url
@@ -26,7 +27,6 @@ FORMAT = os.getenv('CSIRTG_FM_FORMAT', 'table')
 STDOUT_FIELDS = COLUMNS
 ARCHIVE_PATH = os.environ.get('CSIRTG_SMRT_ARCHIVE_PATH', CACHE_PATH)
 ARCHIVE_PATH = os.path.join(ARCHIVE_PATH, 'fm.db')
-GOBACK_DAYS = 3
 
 # http://python-3-patterns-idioms-test.readthedocs.org/en/latest/Factory.html
 # https://gist.github.com/pazdera/1099559
@@ -185,8 +185,7 @@ class FM(object):
         if limit:
             indicators = itertools.islice(indicators, int(limit))
 
-        indicators = (i for i in indicators if not self.is_archived(i))
-
+        # indicators = (i for i in indicators if not self.is_archived(i))
         indicators = (self.confidence(i) for i in indicators)
         indicators = (self.predict(i) for i in indicators)
 

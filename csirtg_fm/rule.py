@@ -45,7 +45,7 @@ def load_rules(rule, feed=None):
         try:
             rule.feeds = {feed: rule.feeds[feed]}
         except Exception:
-            yield None, None
+            return None
 
     for f in rule.feeds:
         yield rule, f
