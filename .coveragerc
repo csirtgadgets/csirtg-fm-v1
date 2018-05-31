@@ -23,8 +23,11 @@ exclude_lines =
 ignore_errors = True
 
 omit =
-    #csirtg/smrt/parser/pipe.py
-    #cif/_version.py
+    csirtg_fm/clients/*
+    csirtg_fm/cli.py
+    csirtg_fm/_version.py
+    #csirtg_fm/parsers/*
+    #csirtg_fm/utils/*
 
 [html]
 directory = coverage_html_report
