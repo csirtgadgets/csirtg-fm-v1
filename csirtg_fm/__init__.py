@@ -52,7 +52,6 @@ class FM(object):
     def _init_client(self):
         if self.client != 'stdout':
             plugin_path = os.path.join(os.path.dirname(__file__), 'clients')
-            print(plugin_path)
             c = load_plugin(plugin_path, self.client)
             if not c:
                 raise RuntimeError("Unable to load plugin: {}".format(c))

@@ -24,6 +24,6 @@ LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
 LOGLEVEL = 'ERROR'
 LOGLEVEL = os.getenv('CSIRTG_LOGLEVEL', LOGLEVEL).upper()
 
-FIREBALL_SIZE = os.getenv('CSIRTG_FM_FIREBALL_SIZE', 100)
+FIREBALL_SIZE = os.getenv('CSIRTG_FM_FIREBALL_SIZE', 250)
 if FIREBALL_SIZE == '':
     FIREBALL_SIZE = 100

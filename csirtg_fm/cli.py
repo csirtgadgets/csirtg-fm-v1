@@ -122,6 +122,9 @@ def _run_fm(args, **kwargs):
     archiver.clear_memcache()
 
     logger.info('finished run')
+    if args.service:
+        logger.info('sleeping...')
+
 
 
 def main():
@@ -133,8 +136,9 @@ def main():
 
 
         example usage:
-            $ csirtg-fm --rule rules/default
-            $ csirtg-fm --rule default/csirtg.yml --feed port-scanners --remote http://localhost:5000
+            $ csirtg-fm -r rules/default
+            $ csirtg-fm -r csirtg.yml --feed csirtgadgets/darknet
+            $ CIF_TOKEN=1234 csirtg-fm -r csirtg.yml --client cif -d
         '''),
         formatter_class=RawDescriptionHelpFormatter,
         prog='csirtg-fm',
@@ -176,13 +180,6 @@ def main():
 
     setup_logging(args)
 
-    logger.info('loglevel is: {}'.format(logging.getLevelName(logger.getEffectiveLevel())))
-
-    # we're running as a service
-    setup_signals(__name__)
-
-    logger.info('starting...')
-
     if not args.service:
         data = None
         if select.select([sys.stdin, ], [], [], 0.0)[0]:
@@ -201,9 +198,9 @@ def main():
     setup_signals(__name__)
     service_interval = int(args.service_interval)
     r = float(args.delay)
-    logger.info("random delay is {}, then running every {} min after that".format(r, service_interval))
 
-    if r != 0:
+    if r > 0:
+        logger.info("random delay is {}, then running every {} min after that".format(r, service_interval))
         try:
             sleep((r * 60))
 
@@ -215,22 +212,20 @@ def main():
             logger.error(e)
             raise SystemExit
 
-    # setting up fork, which uses the args
+    # we run the service as a fork, a cleaner way to give back any memory consumed by large feed processing
     def _run_fork():
         logger.debug('forking process...')
         p = Process(target=_run_fm, args=(args,))
-
         p.daemon = False
         p.start()
         p.join()
-        logger.debug('child process re-joined')
-    logger.info('starting...')
 
     # first run, PeriodicCallback has builtin wait..
     _run_fork()
 
     main_loop = ioloop.IOLoop()
-    service_interval = (service_interval * 60000)
+    #service_interval = (service_interval * 60000)
+    service_interval = 5000
     loop = ioloop.PeriodicCallback(_run_fork, service_interval)
 
     try:

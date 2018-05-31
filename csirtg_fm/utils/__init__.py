@@ -1,9 +1,9 @@
-import pkgutil
 import logging
 from csirtg_fm.constants import LOG_FORMAT, RUNTIME_PATH, LOGLEVEL, VERSION
 from argparse import ArgumentParser
 import signal
 import os
+import importlib
 from pprint import pprint
 
 
@@ -16,8 +16,6 @@ def get_argument_parser():
         "--runtime-path", help="specify the runtime path [default %(default)s]", default=RUNTIME_PATH
     )
     return ArgumentParser(parents=[BasicArgs], add_help=False)
-
-import importlib
 
 
 # py3.5+

@@ -92,7 +92,7 @@ class Parser(object):
             return
 
         for k, v in self._defaults().items():
-            if ',' in v:
+            if isinstance(v, str) and ',' in v:
                 v = v.replace(' ', '')
                 v = v.split(',')
             setattr(i, k, v)

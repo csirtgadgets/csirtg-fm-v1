@@ -15,13 +15,11 @@ def _load_rules_dir(path):
         if os.path.isdir(f):
             continue
 
-        logger.info("processing {0}/{1}".format(path, f))
-
         try:
             r = Rule(path=os.path.join(path, f))
-        except RuleUnsupported as e:
+        except Exception as e:
             logger.error(e)
-            continue
+            yield None, None
 
         for feed in r.feeds:
             yield r, feed
@@ -29,7 +27,10 @@ def _load_rules_dir(path):
 
 def load_rules(rule, feed=None):
     if os.path.isdir(rule):
-        return _load_rules_dir(rule)
+        for r, feed in _load_rules_dir(rule):
+            yield r, feed
+
+        return
 
     logger.info("processing {0}".format(rule))
     try:

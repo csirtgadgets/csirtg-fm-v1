@@ -91,10 +91,19 @@ class Client(object):
             self.cache = os.path.join(self.dir, self.feed)
 
         # test to see if we've decompressed a similarly named text file
+        logger.debug(self.cache)
         if self.cache.endswith('.zip'):
             _, f = os.path.split(self.cache)
-            f, t = f.split('.')
-            f = '%s.txt' % f
+            f, t = f.rsplit('.', 1)
+            f = '%s.txt' % f  # match csv
+            f = os.path.join(_, f)
+            if os.path.exists(f):
+                self.cache = f
+
+            # csv
+            _, f = os.path.split(self.cache)
+            f, t = f.rsplit('.', 1)
+            f = '%s' % f
             f = os.path.join(_, f)
             if os.path.exists(f):
                 self.cache = f

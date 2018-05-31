@@ -33,6 +33,7 @@ class Pattern(Parser):
             self.cols = self.cols.split(',')
 
     def process(self):
+        count = 0
         with open(self.cache, 'rb') as cache:
             for l in cache.readlines():
                 l = l.decode('utf-8')
@@ -66,6 +67,10 @@ class Pattern(Parser):
                 logger.debug(i)
 
                 yield i.__dict__()
+
+                count += 1
+                if self.limit and int(self.limit) == count:
+                    return
 
 
 Plugin = Pattern

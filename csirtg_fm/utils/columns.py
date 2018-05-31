@@ -50,13 +50,14 @@ def get_indicator(l, hints=None):
             continue
 
         if isinstance(e, (str, bytes)):
-            for ii in range(0, 25):
-                if len(hints) == ii:
-                    break
+            if hints:
+                for ii in range(0, 25):
+                    if len(hints) == ii:
+                        break
 
-                if e.lower() == hints[ii].lower():
-                    i[e] = 'description'
-                    break
+                    if e.lower() == hints[ii].lower():
+                        i[e] = 'description'
+                        break
 
             if not i.get(e):
                 i[e] = 'string'
@@ -94,7 +95,7 @@ def get_indicator(l, hints=None):
             continue
 
         if i[e] == 'string':
-            if re.match(r'[0-9A-Za-z\.\s\/]+', e):
+            if re.match(r'[0-9A-Za-z\.\s\/]+', e) and i2.asn:
                 i2.asn_desc = e
                 continue
 
