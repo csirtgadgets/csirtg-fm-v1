@@ -31,6 +31,8 @@ class Delim(Parser):
                 logger.debug(l)
                 m = self.pattern.split(l)
 
+                logger.debug(m)
+
                 i = get_indicator(m, hints=hints)
 
                 if not i.itype:
