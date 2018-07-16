@@ -24,9 +24,9 @@ class Parser(object):
         #     self.fireball = int(FIREBALL_SIZE)
         # else:
         #     self.fireball = False
-        #
-        # if self.limit is not None:
-        #     self.limit = int(limit)
+
+        if self.limit is not None:
+            self.limit = int(self.limit)
 
         self.comments = re.compile(RE_COMMENTS)
 
