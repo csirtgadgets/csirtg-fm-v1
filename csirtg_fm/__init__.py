@@ -124,7 +124,11 @@ class FM(object):
             if i.last_at:
                 hour = i.last_at.hour
 
-            p = predict_ip(i.indicator, hour)
+            try:
+                p = predict_ip(i.indicator, hour)
+            except:
+                return i
+
             if p:
                 i.probability = 84.0
 

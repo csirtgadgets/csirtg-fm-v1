@@ -20,7 +20,6 @@ class Delim(Parser):
         with open(self.cache, 'r') as cache:
             from ..utils.content import peek
             hints = peek(cache, lines=25, delim=self.delim)
-            pprint(hints)
             cache.seek(0)
             for l in cache.readlines():
                 if self.ignore(l):  # comment or skip
@@ -38,7 +37,17 @@ class Delim(Parser):
                     logger.error("unable to parse line: \n%s" % l)
                     continue
 
+                if self.rule.defaults.get('values'):
+                    for idx, v in enumerate(self.rule.defaults['values']):
+                        if not getattr(i, v):
+                            setattr(i, v, m[idx])
+
                 self.set_defaults(i)
+
+                if self.rule.feeds[self.feed].get('values'):
+                    for idx, v in enumerate(self.rule.feeds[self.feed]['values']):
+                        if not getattr(i, v):
+                            setattr(i, v, m[idx])
 
                 yield i.__dict__()
 
