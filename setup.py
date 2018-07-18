@@ -69,7 +69,8 @@ setup(
         'nltk',
         'csirtgsdk',
         'csirtg_mail',
-        'csirtg-urlsml',
+        'csirtg-domainsml-tf',
+        'csirtg-urlsml-tf',
         'csirtg-ipsml',
     ],
     entry_points={

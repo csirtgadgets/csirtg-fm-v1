@@ -53,7 +53,7 @@ def _run_fm(args, **kwargs):
 
     logger.info('starting run...')
 
-    s = FM(archiver=archiver, client=args.client, goback=goback)
+    s = FM(archiver=archiver, client=args.client, goback=goback, probabilities=args.probabilities)
 
     fetch = True
     if args.no_fetch:
@@ -126,7 +126,6 @@ def _run_fm(args, **kwargs):
         logger.info('sleeping...')
 
 
-
 def main():
     p = get_argument_parser()
     p = ArgumentParser(
@@ -175,6 +174,8 @@ def main():
     p.add_argument('--service-interval', help='set run interval [in minutes, default %(default)s]',
                    default=SERVICE_INTERVAL)
     p.add_argument('--delay', help='specify initial delay', default=randint(5, 55))
+
+    p.add_argument('--probabilities', action='store_true')
 
     args = p.parse_args()
 

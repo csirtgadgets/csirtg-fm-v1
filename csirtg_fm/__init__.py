@@ -6,8 +6,8 @@ import arrow
 from pprint import pprint
 import itertools
 
-from csirtg_urlsml import predict as predict_url
-from csirtg_domainsml import predict as predict_domain
+from csirtg_urlsml_tf import predict as predict_url
+from csirtg_domainsml_tf import predict as predict_domain
 from csirtg_ipsml import predict as predict_ip
 
 from csirtg_indicator.utils import resolve_itype
@@ -45,6 +45,7 @@ class FM(object):
         self.goback = kwargs.get('goback')
         self.skip_invalid = kwargs.get('skip_invalid')
         self.client = kwargs.get('client')
+        self.probabilities = kwargs.get('probabilities')
 
         if self.client and self.client != 'stdout':
             self._init_client()
@@ -129,9 +130,7 @@ class FM(object):
             except:
                 return i
 
-            if p:
-                i.probability = 84.0
-
+            i.probability = str(round((p[0][0] * 100), 2))
             return i
 
         elif i.itype == 'fqdn':
@@ -144,8 +143,8 @@ class FM(object):
             return i
 
         p = fn(i.indicator)
-        if p:
-            i.probability = 84.0
+        i.probability = str(round((p[0][0] * 100), 2))
+
 
         return i
 
@@ -191,7 +190,9 @@ class FM(object):
 
         # indicators = (i for i in indicators if not self.is_archived(i))
         indicators = (self.confidence(i) for i in indicators)
-        indicators = (self.predict(i) for i in indicators)
+
+        if self.probabilities:
+            indicators = (self.predict(i) for i in indicators)
 
         indicators_batches = chunk(indicators, int(FIREBALL_SIZE))
         for batch in indicators_batches:
