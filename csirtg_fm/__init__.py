@@ -7,7 +7,7 @@ from pprint import pprint
 import itertools
 
 from csirtg_urlsml_tf import predict as predict_url
-from csirtg_domainsml_tf import predict as predict_domain
+from csirtg_domainsml_tf import predict as predict_fqdn
 from csirtg_ipsml import predict as predict_ip
 
 from csirtg_indicator.utils import resolve_itype
@@ -119,34 +119,27 @@ class FM(object):
 
         return i
 
-    def predict(self, i):
-        if i.itype == 'ipv4':
-            hour = i.reported_at.hour
-            if i.last_at:
-                hour = i.last_at.hour
+    def predict_urls(self, indicators):
+        indicators = list(indicators)
+        urls = [(i.indicator, idx) for idx, i in enumerate(indicators) if i.itype == 'url']
 
-            try:
-                p = predict_ip(i.indicator, hour)
-            except:
-                return i
+        predict = predict_url([u[0] for u in urls])
 
-            i.probability = str(round((p[0][0] * 100), 2))
-            return i
+        for idx, u in enumerate(urls):
+            indicators[u[1]].probability = round((predict[idx][0] * 100), 2)
 
-        elif i.itype == 'fqdn':
-            fn = predict_domain
+        return indicators
 
-        elif i.itype == 'url':
-            fn = predict_url
+    def predict_fqdns(self, indicators):
+        indicators = list(indicators)
+        urls = [(i.indicator, idx) for idx, i in enumerate(indicators) if i.itype == 'fqdn']
 
-        else:
-            return i
+        predict = predict_fqdn([u[0] for u in urls])
 
-        p = fn(i.indicator)
-        i.probability = str(round((p[0][0] * 100), 2))
+        for idx, u in enumerate(urls):
+            indicators[u[1]].probability = round((predict[idx][0] * 100), 2)
 
-
-        return i
+        return indicators
 
     def is_archived(self, i):
         if isinstance(self.archiver, NOOPArchiver):
@@ -192,7 +185,8 @@ class FM(object):
         indicators = (self.confidence(i) for i in indicators)
 
         if self.probabilities:
-            indicators = (self.predict(i) for i in indicators)
+            indicators = self.predict_urls(indicators)
+            indicators = self.predict_fqdns(indicators)
 
         indicators_batches = chunk(indicators, int(FIREBALL_SIZE))
         for batch in indicators_batches:
