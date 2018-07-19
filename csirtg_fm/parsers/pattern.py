@@ -69,6 +69,7 @@ class Pattern(Parser):
                 yield i.__dict__()
 
                 count += 1
+
                 if self.limit and int(self.limit) == count:
                     return
 

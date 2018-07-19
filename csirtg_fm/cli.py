@@ -30,6 +30,8 @@ ARCHIVE_PATH = os.environ.get('CSIRTG_SMRT_ARCHIVE_PATH', CACHE_PATH)
 ARCHIVE_PATH = os.path.join(ARCHIVE_PATH, 'fm.db')
 GOBACK_DAYS = 3
 SERVICE_INTERVAL = os.getenv('CSIRTG_FM_SERVICE_INTERVAL', 60)
+LIMIT = os.getenv('CSIRTG_FM_LIMIT', 25)
+LIMIT = int(LIMIT)
 
 logger = logging.getLogger(__name__)
 

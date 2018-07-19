@@ -175,7 +175,7 @@ class FM(object):
         if self.goback:
             indicators = (i for i in indicators if not self.is_old(i))
 
-        if not limit:
+        if rule.feeds[feed].get('limit') and limit == 25:
             limit = rule.feeds[feed].get('limit')
 
         if limit:

@@ -25,9 +25,6 @@ class Parser(object):
         # else:
         #     self.fireball = False
 
-        if self.limit is not None:
-            self.limit = int(self.limit)
-
         self.comments = re.compile(RE_COMMENTS)
 
         if self.rule.feeds[self.feed].get('skip'):
@@ -52,6 +49,14 @@ class Parser(object):
 
         if self.line_filter:
             self.line_filter = re.compile(self.line_filter)
+
+        if self.rule.feeds[self.feed].get('limit'):
+            self.limit = self.rule.feeds[self.feed]['limit']
+        elif self.rule.limit:
+            self.limit = self.rule.limit
+
+        if self.limit is not None:
+            self.limit = int(self.limit)
 
         self.line_count = 0
 
