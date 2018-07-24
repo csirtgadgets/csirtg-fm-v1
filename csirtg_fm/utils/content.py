@@ -63,15 +63,16 @@ def _is_json(f, mime):
 
     first = f.readline().rstrip("\n")
     last = first
+
     try:
         last = f.readlines()[-1].rstrip("\n")
     except Exception:
         pass
 
-    if not first.startswith(("'[{", "'{")):
+    if not first.startswith(("'[{", "'{")) and not first.startswith(("[{", "{")):
         return
 
-    if not last.endswith(("}]'", "}'")):
+    if not last.endswith(("}]'", "}'")) and not last.endswith(("}]", "}")):
         return
 
     return 'json'

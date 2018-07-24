@@ -11,7 +11,7 @@ def decompress_gzip(f):
     path_to_store = f[:-3]  # remove the '.gz' from the filename
 
     # store uncompressed file data from 's' variable
-    with open(path_to_store, 'w') as f:
+    with open(path_to_store, 'wb') as f:
         f.write(s)
 
     return path_to_store

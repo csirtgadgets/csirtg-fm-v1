@@ -22,6 +22,9 @@ def get_indicator(l, hints=None):
 
     # step 1, detect datatypes
     for e in l:
+        if not isinstance(e, (str, bytes)):
+            continue
+
         e = e.rstrip()
         e = e.lstrip()
 

@@ -12,7 +12,7 @@ import arrow
 import requests
 
 from ..utils.content import get_mimetype
-from ..utils.decoders import decompress_zip
+from ..utils.decoders import decompress_zip, decompress_gzip
 
 RE_SUPPORTED_DECODE = re.compile("zip|lzf|lzma|xz|lzop")
 RE_CACHE_TYPES = re.compile('([\w.-]+\.(csv|zip|txt|gz))$')
@@ -53,6 +53,21 @@ class Client(object):
             self.remote = self.rule.defaults.get('remote')
         else:
             self.remote = self.rule.feeds[feed].get('remote')
+
+        if self.remote and '{token}' in self.remote:
+            if self.rule.token:
+                if self.rule.token.endswith('_TOKEN'):
+                    self.rule.token = os.getenv(self.rule.token)
+                self.remote = self.remote.format(token=self.rule.token)
+            else:
+                self.remote = self.remote.format(token='')
+
+        elif self.rule.token:
+            header = 'Authorization: Token token='
+            if self.rule.token_header:
+                header = self.rule.token_header
+
+            self.token = '{}{}'.format(header, self.rule.token)
 
         self.username = None
         self.password = None
@@ -175,6 +190,10 @@ class Client(object):
     def _cache_decode(self):
         ftype = get_mimetype(self.cache)
 
+        if 'gzip' in ftype:
+            self.cache = decompress_gzip(self.cache)
+            return
+
         if ftype == "application/zip":
             for fname in decompress_zip(self.cache):
                 self.cache = os.path.join(os.path.dirname(self.cache), fname)
@@ -187,6 +206,7 @@ class Client(object):
 
         if not fetch and os.path.exists(self.cache):
             logger.debug('skipping fetch..')
+            self._cache_decode()
             return
         
         logger.debug('checking HEAD')
