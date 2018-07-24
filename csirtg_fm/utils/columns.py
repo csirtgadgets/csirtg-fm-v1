@@ -17,6 +17,9 @@ def is_timestamp(s):
 def get_indicator(l, hints=None):
     i = {}
 
+    if not isinstance(l, list):
+        l = [l]
+
     # step 1, detect datatypes
     for e in l:
         e = e.rstrip()

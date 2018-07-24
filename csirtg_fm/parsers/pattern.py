@@ -1,6 +1,7 @@
 import copy
 import re
 import logging
+from pprint import pprint
 
 from csirtg_fm.parsers import Parser
 from csirtg_fm.utils.columns import get_indicator
@@ -12,7 +13,7 @@ class Pattern(Parser):
     def __init__(self, *args, **kwargs):
         super(Pattern, self).__init__(*args, **kwargs)
 
-        self.pattern = self.rule.defaults.get('pattern')
+        self.pattern = self.rule.defaults.get('pattern', '^\S+$')
 
         if self.rule.feeds[self.feed].get('pattern'):
             self.pattern = self.rule.feeds[self.feed].get('pattern')
@@ -51,6 +52,10 @@ class Pattern(Parser):
                     continue
                 except AttributeError as e:
                     continue
+
+                # prob a single feed file
+                if len(m) == 0:
+                    m = [l]
 
                 i = get_indicator(m)
 
