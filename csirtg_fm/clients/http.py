@@ -194,7 +194,7 @@ class Client(object):
             self.cache = decompress_gzip(self.cache)
             return
 
-        if ftype == "application/zip":
+        if 'zip' in ftype:
             for fname in decompress_zip(self.cache):
                 self.cache = os.path.join(os.path.dirname(self.cache), fname)
 
@@ -229,6 +229,7 @@ class Client(object):
 
         if not NO_HEAD and (ts1 <= ts2):
             logger.debug('cache is OK: {} <= {}'.format(ts1, ts2))
+            self._cache_decode()
             return
 
         logger.debug("refreshing cache...")

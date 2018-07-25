@@ -162,6 +162,9 @@ class FM(object):
 
     def process(self, rule, feed, parser_name, cli, limit=None, indicators=[]):
 
+        if rule.feeds[feed].get('limit') and limit == 25:
+            limit = rule.feeds[feed].get('limit')
+
         if parser_name != 'csirtg':
             # detect and load the parser
             plugin_path = os.path.join(os.path.dirname(__file__), 'parsers')
@@ -177,9 +180,6 @@ class FM(object):
         # check to see if the indicator is too old
         if self.goback:
             indicators = (i for i in indicators if not self.is_old(i))
-
-        if rule.feeds[feed].get('limit') and limit == 25:
-            limit = rule.feeds[feed].get('limit')
 
         if limit:
             indicators = itertools.islice(indicators, int(limit))
