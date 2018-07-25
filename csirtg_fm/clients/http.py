@@ -208,7 +208,12 @@ class Client(object):
             logger.debug('skipping fetch..')
             self._cache_decode()
             return
-        
+
+        if arrow.utcnow().shift(minutes=-5) < self._cache_modified():
+            logger.debug('skipping fetch, cache is less than 300s old')
+            self._cache_decode()
+            return
+
         logger.debug('checking HEAD')
 
         auth = False
@@ -216,6 +221,12 @@ class Client(object):
             auth = (self.username, self.password)
 
         resp = self.handle.head(self.remote, auth=auth, verify=self.verify_ssl)
+
+        if resp.status_code in [429, 500, 502, 503, 504]:
+            logger.info('HEAD check received: %s' % str(resp.status_code))
+            logger.info('skipping until next cycle..')
+            self._cache_decode()
+            return
 
         if not resp.headers.get('Last-Modified'):
             logger.debug('no last-modified header')
