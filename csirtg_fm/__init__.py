@@ -45,10 +45,13 @@ class FM(object):
         self.goback = kwargs.get('goback')
         self.skip_invalid = kwargs.get('skip_invalid')
         self.client = kwargs.get('client')
-        self.probabilities = kwargs.get('probabilities')
+        self.ml = kwargs.get('ml')
 
         if self.client and self.client != 'stdout':
             self._init_client()
+
+        if logger.getEffectiveLevel() != logging.DEBUG:
+            self.skip_invalid = True
 
     def _init_client(self):
         if self.client != 'stdout':
@@ -166,7 +169,7 @@ class FM(object):
             parser = parser.Plugin(rule=rule, feed=feed, cache=cli.cache, limit=limit)
 
             # bring up the pipeline
-            indicators = parser.process()
+            indicators = parser.process(skip_invalid=self.skip_invalid)
 
         indicators = (i for i in indicators if self.is_valid(i))
         indicators = (self.clean_indicator(i) for i in indicators)
@@ -184,7 +187,7 @@ class FM(object):
         # indicators = (i for i in indicators if not self.is_archived(i))
         indicators = (self.confidence(i) for i in indicators)
 
-        if self.probabilities:
+        if self.ml:
             indicators = self.predict_urls(indicators)
             indicators = self.predict_fqdns(indicators)
 

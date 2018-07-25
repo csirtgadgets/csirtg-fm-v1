@@ -82,6 +82,7 @@ class Rule(dict):
                 self.delim_pattern = d.get('delim_pattern')
                 self.line_filter = d.get('line_filter')
                 self.limit = d.get('limit')
+                self.reverse = d.get('reverse')
 
             else:
                 raise RuleUnsupported('unsupported file type: {}'.format(path))
@@ -105,6 +106,7 @@ class Rule(dict):
             self.delim_pattern = rule.get('delim_pattern')
             self.line_filter = rule.get('line_filter')
             self.limit = rule.get('limit')
+            self.reverse = rule.get('reverse')
 
         if self.token and self.token.endswith('_TOKEN'):
             self.token = os.getenv(self.token)
@@ -125,5 +127,6 @@ class Rule(dict):
             'delim_pattern': self.delim_pattern,
             'line_filter': self.line_filter,
             'limit': self.limit,
-            'token': self.token
+            'token': self.token,
+            'reverse': self.reverse
         }, sort_keys=True, indent=4, separators=(',', ': '))

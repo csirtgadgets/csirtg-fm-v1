@@ -33,12 +33,10 @@ class Pattern(Parser):
         if isinstance(self.cols, str):
             self.cols = self.cols.split(',')
 
-    def process(self):
+    def process(self, **kwargs):
         count = 0
-        with open(self.cache, 'rb') as cache:
+        with open(self.cache, 'r', encoding='utf-8', errors='ignore') as cache:
             for l in cache.readlines():
-                l = l.decode('utf-8')
-
                 if self.ignore(l):  # comment or skip
                     continue
 
@@ -59,17 +57,22 @@ class Pattern(Parser):
 
                 i = get_indicator(m)
 
-                if not i.itype:
-                    logger.error("unable to parse line: \n%s" % l)
-                    continue
-
                 self.set_defaults(i)
 
                 if self.cols:
                     for idx, col in enumerate(self.cols):
-                        setattr(i, col, m[idx])
+                        try:
+                            setattr(i, col, m[idx])
+                        except Exception as e:
+                            if kwargs.get('skip_invalid', False):
+                                continue
+                            raise
 
                 logger.debug(i)
+
+                if not i.itype:
+                    logger.error("unable to parse line: \n%s" % l)
+                    continue
 
                 yield i.__dict__()
 

@@ -20,7 +20,7 @@ class Json(Parser):
     def __init__(self, *args, **kwargs):
         super(Json, self).__init__(*args, **kwargs)
 
-    def process(self):
+    def process(self, **kwargs):
         map = self.rule.feeds[self.feed].get('map')
         values = self.rule.feeds[self.feed].get('values')
         envelope = self.rule.feeds[self.feed].get('envelope')

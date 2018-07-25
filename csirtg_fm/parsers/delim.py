@@ -15,13 +15,17 @@ class Delim(Parser):
         if self.delim and isinstance(self.delim, str):
             self.pattern = re.compile(self.delim)
 
-    def process(self):
+    def process(self, **kwargs):
         count = 0
         with open(self.cache, 'r', encoding='utf-8', errors='ignore') as cache:
             from ..utils.content import peek
             hints = peek(cache, lines=25, delim=self.delim)
             cache.seek(0)
-            for l in cache.readlines():
+            g = cache.readlines()
+            if self.rule.reverse:
+                g = reversed(g)
+
+            for l in g:
                 if self.ignore(l):  # comment or skip
                     continue
 
@@ -38,7 +42,7 @@ class Delim(Parser):
                 i = get_indicator(m, hints=hints)
 
                 if not i.itype:
-                    logger.error("unable to parse line: \n%s" % l)
+                    logger.error("unable to detect indicator: \n%s" % l)
                     continue
 
                 if self.rule.defaults.get('values'):
