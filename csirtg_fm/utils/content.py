@@ -41,7 +41,7 @@ def _is_flat(f, mime):
 
 
 def _is_xml(f, mime):
-    if not mime.startswith(("application/xml", "'XML document text")):
+    if not mime.startswith(("application/xml", "'XML document text", 'text/xml')):
         return
 
     first = f.readline()

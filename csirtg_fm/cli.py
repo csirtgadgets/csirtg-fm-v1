@@ -77,8 +77,10 @@ def _run_fm(args, **kwargs):
             parser_name = 'csirtg'
             cli = None
             if not os.getenv('CSIRTG_TOKEN'):
+                logger.info('')
                 logger.info('CSIRTG_TOKEN var not set in ENV, skipping %s' % f)
                 logger.info('Sign up for a Free account: https://csirtg.io')
+                logger.info('')
                 continue
 
             for i in s.fetch_csirtg(f, limit=args.limit):
