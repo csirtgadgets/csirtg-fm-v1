@@ -202,6 +202,7 @@ class Client(object):
         if self._cache_size() == 0:
             logger.debug('cache size is 0, downloading...')
             self._cache_write(self.handle)
+            self._cache_decode()
             return
 
         if not fetch and os.path.exists(self.cache):

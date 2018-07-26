@@ -104,7 +104,7 @@ class FM(object):
         if i.itype in ['md5', 'sha1', 'sha256', 'sha512']:
             i.confidence = 4
             return i
-        
+
         if i.itype == 'ipv4':
             if not i.tags:
                 i.confidence = 2
