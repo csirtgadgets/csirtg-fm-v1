@@ -2,6 +2,8 @@ import magic
 import sys
 from pprint import pprint
 import re
+from collections import OrderedDict
+
 from csirtg_indicator.utils import resolve_itype
 
 RE_SUPPORTED_DECODE = re.compile("zip|lzf|lzma|xz|lzop")
@@ -82,12 +84,12 @@ def _is_delimited(f, mime):
     if not _is_ascii(f, mime):
         return
 
-    m = {
-        '|': 'pipe',
-        ';': 'semicolon',
-        "\t": 'tsv',
-        ',': 'csv',
-    }
+    m = OrderedDict([
+        ('|', 'pipe'),
+        (';', 'semicolon'),
+        ("\t", 'tsv'),
+        (',', 'csv'),
+    ])
 
     first = f.readline().rstrip("\n")
     while first.startswith('#'):
