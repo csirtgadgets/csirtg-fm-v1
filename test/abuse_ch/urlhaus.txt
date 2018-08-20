@@ -1,0 +1,40 @@
+################################################################
+# abuse.ch URLhaus Database Dump (CSV)                         #
+# Last updated: 2018-08-20 19:10:05 (UTC)                      #
+#                                                              #
+# Terms Of Use: https://urlhaus.abuse.ch/api/                  #
+# For questions please contact urlhaus [at] abuse.ch           #
+################################################################
+#
+# id,dateadded,url,url_status,threat,tags,urlhaus_link
+"44693","2018-08-20 19:10:05","http://madlabs.com.my/2428009LPOJER/com/Personal","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44693/"
+"44692","2018-08-20 19:09:14","http://business.imuta.ng/default/US/Summit-Companies-Invoice-12648214","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44692/"
+"44691","2018-08-20 19:09:13","http://yaokuaile.info/7698PNQ/PAYROLL/Personal","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44691/"
+"44690","2018-08-20 19:09:09","http://shop-goldtex.ru/Document/En/Invoice","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44690/"
+"44689","2018-08-20 19:09:08","http://site1.ideomind.in/doc/EN_en/Overdue-payment","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44689/"
+"44688","2018-08-20 19:09:05","http://mshcoop.com/Download/En/Scan","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44688/"
+"44687","2018-08-20 19:09:02","http://etc55.ru/Corporation/EN_en/Question","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44687/"
+"44686","2018-08-20 18:40:13","http://evo.ge/UhTQA7l","online","malware_download","emotet,exe,heodo","https://urlhaus.abuse.ch/url/44686/"
+"44685","2018-08-20 18:40:12","http://alreadyhost.ithinq.net/1bZ","online","malware_download","emotet,exe,heodo","https://urlhaus.abuse.ch/url/44685/"
+"44684","2018-08-20 18:40:10","http://forextradingfrx.org/f6Yri","online","malware_download","emotet,exe,heodo","https://urlhaus.abuse.ch/url/44684/"
+"44683","2018-08-20 18:40:07","http://gruzolub.ru/3PriTY","online","malware_download","emotet,exe,heodo","https://urlhaus.abuse.ch/url/44683/"
+"44682","2018-08-20 18:40:05","http://sano.ir/TdbjY3n","online","malware_download","emotet,exe,heodo","https://urlhaus.abuse.ch/url/44682/"
+"44681","2018-08-20 18:35:30","http://demo3.ir-bi.ir/wp-admin/images/LLC/EN_en/Invoice","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44681/"
+"44680","2018-08-20 18:35:29","http://doughansenmsw.com/LLC/US_us/215-45-326474-937-215-45-326474-221","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44680/"
+"44679","2018-08-20 18:35:25","http://novo.gnextz.com/Aug2018/EN_en/4-Past-Due-Invoices","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44679/"
+"44678","2018-08-20 18:35:22","http://tmg.alri.in/sites/En/Question","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44678/"
+"44677","2018-08-20 18:35:06","http://lenaokno.cz/FILE/EN_en/Invoice-Number-73900","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44677/"
+"44676","2018-08-20 18:35:05","http://chargeupyourbusinessbook.com/xerox/US/Invoice-Corrections-for-83/97","online","malware_download","doc,emotet","https://urlhaus.abuse.ch/url/44676/"
+"44675","2018-08-20 18:20:33","http://condizer.com/tst/index.php?l=soho2.tkn","offline","malware_download","exe,ursnif","https://urlhaus.abuse.ch/url/44675/"
+"44674","2018-08-20 17:59:04","http://habarimoto24.com/Nh/","online","malware_download","emotet,exe,heodo","https://urlhaus.abuse.ch/url/44674/"
+"44673","2018-08-20 17:58:12","http://50.115.166.136/hakai.x86_64","online","malware_download","elf","https://urlhaus.abuse.ch/url/44673/"
+"44672","2018-08-20 17:58:10","http://50.115.166.136/ea7","online","malware_download","elf","https://urlhaus.abuse.ch/url/44672/"
+"44671","2018-08-20 17:58:08","http://50.115.166.136/ea4","online","malware_download","elf","https://urlhaus.abuse.ch/url/44671/"
+"44670","2018-08-20 17:58:06","http://50.115.166.136/hakai.mpsl","online","malware_download","elf","https://urlhaus.abuse.ch/url/44670/"
+"44669","2018-08-20 17:58:05","http://50.115.166.136/bin","online","malware_download","sh","https://urlhaus.abuse.ch/url/44669/"
+"44668","2018-08-20 17:58:04","http://carmenfabian.com/views/post.cab","online","malware_download","ursnif","https://urlhaus.abuse.ch/url/44668/"
+"44667","2018-08-20 17:58:00","http://reversemusicgroup.com/scan/US/Service-Report-2927/","online","malware_download","doc,heodo","https://urlhaus.abuse.ch/url/44667/"
+"44666","2018-08-20 17:57:59","http://hertifical.com/tst/index.php?l=soho6.tkn","offline","malware_download","exe","https://urlhaus.abuse.ch/url/44666/"
+"44665","2018-08-20 17:57:29","http://oving.banachwebdesign.nl/doc/EN_en/Scan/","online","malware_download","doc,heodo","https://urlhaus.abuse.ch/url/44665/"
+"44664","2018-08-20 17:57:28","http://keitoeirl.com/DOC/En_us/Outstanding-Invoices/","online","malware_download","doc,heodo","https://urlhaus.abuse.ch/url/44664/"
+"44663","2018-08-20 17:57:26","http://clubpartyideas.com/20.08.2018-624934515.zip","online","malware_download","zip","https://urlhaus.abuse.ch/url/44663/"
