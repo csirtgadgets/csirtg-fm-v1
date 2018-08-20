@@ -67,11 +67,9 @@ setup(
         'SQLAlchemy',
         'tornado',
         'nltk',
-        'csirtgsdk',
-        'csirtg_mail',
         'csirtg-domainsml-tf',
         'csirtg-urlsml-tf',
-        'csirtg-ipsml',
+        'csirtg-ipsml-tf',
     ],
     entry_points={
         'console_scripts': [
