@@ -16,6 +16,7 @@ csirtg_indicator>=2.0a2
 csirtgsdk>=0.0.0a9
 csirtg_mail>=0.0.0a9
 
+tensorflow==1.8
 csirtg-urlsml-tf
 csirtg-domainsml-tf
-csirtg-ipsml
+csirtg-ipsml-tf

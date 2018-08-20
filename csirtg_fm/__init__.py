@@ -8,7 +8,8 @@ import itertools
 
 from csirtg_urlsml_tf import predict as predict_url
 from csirtg_domainsml_tf import predict as predict_fqdn
-from csirtg_ipsml import predict as predict_ip
+from csirtg_ipsml_tf import predict as predict_ip
+from csirtg_ipsml_tf.utils import extract_features as extract_features_ip
 
 from csirtg_indicator.utils import resolve_itype
 from csirtg_indicator.constants import COLUMNS
@@ -148,6 +149,25 @@ class FM(object):
 
         return indicators
 
+    def predict_ips(self, indicators):
+        indicators = list(indicators)
+        ips = [(i, idx) for idx, i in enumerate(indicators) if i.itype == 'ipv4' and not i.probability]
+
+        if len(ips) == 0:
+            return indicators
+
+        ips_feats = []
+        for i in ips:
+            f = list(extract_features_ip(i[0].indicator, i[0].reported_at))
+            ips_feats.append(f[0])
+
+        predict = predict_ip([ips_feats])
+
+        for idx, u in enumerate(ips):
+            indicators[u[1]].probability = round((predict[idx][0] * 100), 2)
+
+        return indicators
+
     def is_archived(self, i):
         if isinstance(self.archiver, NOOPArchiver):
             return
@@ -194,6 +214,7 @@ class FM(object):
         if self.ml:
             indicators = self.predict_urls(indicators)
             indicators = self.predict_fqdns(indicators)
+            indicators = self.predict_ips(indicators)
 
         indicators_batches = chunk(indicators, int(FIREBALL_SIZE))
         for batch in indicators_batches:
