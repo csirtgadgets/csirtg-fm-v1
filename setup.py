@@ -24,7 +24,7 @@ if sys.argv[-1] == 'test':
         err_msg = e.message.replace("No module named ", "")
         msg = "%s is not installed. Install your test requirements." % err_msg
         raise ImportError(msg)
-    r = os.system('py.test -v --cov=csirtg_fm --cov-fail-under=25')
+    r = os.system('py.test -v --cov=csirtg_fm --cov-fail-under=35')
     if r == 0:
         sys.exit()
     else:
