@@ -25,5 +25,7 @@ def test_abuse_ch_urlhaus():
         indicators.add(i.indicator)
         tags.add(i.tags[0])
 
+    from pprint import pprint
+    pprint(indicators)
     assert 'http://business.imuta.ng/default/US/Summit-Companies-Invoice-12648214'.lower() in indicators
     assert 'exploit' in tags
