@@ -5,6 +5,9 @@ from csirtg_indicator import Indicator
 from pprint import pprint
 import re
 
+# py < 3.6
+from collections import OrderedDict
+
 
 def is_timestamp(s):
     try:
@@ -15,13 +18,14 @@ def is_timestamp(s):
 
 
 def get_indicator(l, hints=None):
-    i = {}
+    i = OrderedDict()
 
     if not isinstance(l, list):
         l = [l]
 
     # step 1, detect datatypes
     for e in l:
+        print(e)
         if not isinstance(e, (str, bytes)):
             continue
 
