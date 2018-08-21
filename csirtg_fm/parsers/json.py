@@ -5,6 +5,7 @@ import logging
 import os
 from pprint import pprint
 from csirtg_fm.utils.columns import get_indicator
+from collections import OrderedDict
 
 TRACE = os.environ.get('CSIRTG_FM_PARSER_TRACE')
 
@@ -26,12 +27,13 @@ class Json(Parser):
         envelope = self.rule.feeds[self.feed].get('envelope')
 
         count = 0
+        from collections import OrderedDict
         with open(self.cache, 'rb') as cache:
             for l in cache.readlines():
                 l = l.decode('utf-8')
 
                 try:
-                    l = json.loads(l)
+                    l = json.loads(l, object_pairs_hook=OrderedDict)  # py < 3.6
                 except ValueError as e:
                     logger.error('json parsing error: {}'.format(e))
                     continue
