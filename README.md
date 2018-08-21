@@ -4,6 +4,8 @@ The FASTEST way to consume Threat Intel.
 
 https://youtu.be/0nf1m-2Po8I
 
+https://csirtgadgets.com/commits/2018/4/6/f-your-formats-just-show-me-the-data
+
 <img width="1175" alt="screen shot 2018-05-02 at 9 52 18 am" src="https://user-images.githubusercontent.com/474878/39527101-9e75b164-4dee-11e8-9b2d-ba2752a0d624.png">
 
 <img width="985" alt="screen shot 2018-05-02 at 9 53 45 am" src="https://user-images.githubusercontent.com/474878/39527152-c80e59ea-4dee-11e8-9546-2c0bf145352a.png">
