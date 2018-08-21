@@ -18,11 +18,13 @@ def test_malc0de_urls():
     assert parser_name == 'rss'
 
     indicators = set()
-    for i in s.process(rule, 'urls', parser_name, cli, limit=25, indicators=[]):
+    for i in s.process(rule, 'urls', parser_name, cli, indicators=[]):
         if not i:
             continue
 
         indicators.add(i.indicator)
+
+    pprint(indicators)
 
     assert len(indicators) > 0
     assert len(indicators.pop()) > 4
@@ -37,7 +39,7 @@ def test_malc0de_malware():
     assert parser_name == 'rss'
 
     indicators = set()
-    for i in s.process(rule, 'malware', parser_name, cli, limit=25, indicators=[]):
+    for i in s.process(rule, 'malware', parser_name, cli, indicators=[]):
         if not i:
             continue
 
