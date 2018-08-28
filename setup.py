@@ -11,7 +11,7 @@ if sys.version_info < (3, 5):
 if os.environ.get('USER') == 'vagrant' or os.path.isdir('/vagrant'):
     del os.link
 
-lmagic = 'libmagic2.so'
+lmagic = 'libmagic.so'
 if sys.platform == 'darwin':
     lmagic = 'libmagic.dylib'
 
