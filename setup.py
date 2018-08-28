@@ -11,6 +11,19 @@ if sys.version_info < (3, 5):
 if os.environ.get('USER') == 'vagrant' or os.path.isdir('/vagrant'):
     del os.link
 
+lmagic = 'libmagic.so'
+if sys.platform == 'darwin':
+    lmagic = 'libmagic.dylib'
+
+try:
+    from ctypes import cdll
+    cdll.LoadLibrary(lmagic)
+except OSError:
+    print("")
+    print('libmagic is required')
+    print("")
+    raise SystemExit
+
 # https://www.pydanny.com/python-dot-py-tricks.html
 if sys.argv[-1] == 'test':
     test_requirements = [
