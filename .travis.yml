@@ -10,6 +10,7 @@ python:
   - 3.6
 
 install:
+  - sudo apt-get install libmagic-dev
   - pip install pip --upgrade
   - easy_install distribute
   - pip install -r dev_requirements.txt
