@@ -8,8 +8,6 @@ import os
 logger = logging.getLogger(__name__)
 TRACE = os.getenv('CSIRTG_FM_PARSER_TRACE', '1')
 
-logger = logging.getLogger(__name__)
-
 if logger.getEffectiveLevel() == logging.DEBUG:
     if TRACE == '0':
         logger.setLevel(logging.INFO)
