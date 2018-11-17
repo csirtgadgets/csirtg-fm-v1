@@ -25,7 +25,6 @@ def get_indicator(l, hints=None):
 
     # step 1, detect datatypes
     for e in l:
-        print(e)
         if not isinstance(e, (str, bytes)):
             continue
 

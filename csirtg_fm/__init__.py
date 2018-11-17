@@ -5,6 +5,7 @@ import os.path
 import arrow
 from pprint import pprint
 import itertools
+from time import time
 
 from csirtg_urlsml_tf import predict as predict_url
 from csirtg_domainsml_tf import predict as predict_fqdn
@@ -212,14 +213,18 @@ class FM(object):
         indicators = (self.confidence(i) for i in indicators)
 
         if self.ml:
+            logger.debug('starting predictions..')
+            s = time()
             indicators = self.predict_urls(indicators)
             indicators = self.predict_fqdns(indicators)
             indicators = self.predict_ips(indicators)
+            logger.debug('completed in %fs' % (time() - s))
 
         indicators_batches = chunk(indicators, int(FIREBALL_SIZE))
         for batch in indicators_batches:
             # send batch
             if self.client and self.client != 'stdout':
+                logger.info('sending: %i' % len(batch))
                 self.client.indicators_create(batch)
 
             # archive

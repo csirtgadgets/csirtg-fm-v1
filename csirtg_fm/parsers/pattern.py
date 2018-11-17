@@ -1,12 +1,19 @@
-import copy
 import re
 import logging
-from pprint import pprint
+import os
 
 from csirtg_fm.parsers import Parser
 from csirtg_fm.utils.columns import get_indicator
 
+TRACE = os.getenv('CSIRTG_FM_PARSER_TRACE', '1')
+
 logger = logging.getLogger(__name__)
+
+# turn on verbose debugging if _TRACE is the default
+if logger.getEffectiveLevel() == logging.DEBUG:
+    if TRACE == '0':
+        logger.setLevel(logging.INFO)
+
 
 class Pattern(Parser):
 

@@ -7,13 +7,12 @@ import os
 from csirtg_fm.parsers import Parser
 from csirtg_indicator import Indicator
 
-TRACE = os.environ.get('CSIRTG_FM_PARSER_TRACE')
-
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+TRACE = os.getenv('CSIRTG_FM_PARSER_TRACE', '1')
 
-if not TRACE:
-    logger.setLevel(logging.ERROR)
+if logger.getEffectiveLevel() == logging.DEBUG:
+    if TRACE == '0':
+        logger.setLevel(logging.INFO)
 
 
 class Rss(Parser):
