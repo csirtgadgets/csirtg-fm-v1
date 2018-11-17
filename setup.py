@@ -48,7 +48,7 @@ if sys.platform == 'nt':
     package_data['csirtg_fm'] = os.path.join('tools', 'magic1.dll')
 
 setup(
-    name="csirtg_fm",
+    name="csirtg-fm",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     package_data=package_data,
