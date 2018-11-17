@@ -32,7 +32,7 @@ def load_rules(rule, feed=None):
 
         return
 
-    logger.info("processing {0}".format(rule))
+    logger.info("processing %s - %s" % (rule, feed))
     try:
         rule = Rule(path=rule)
     except Exception as e:
