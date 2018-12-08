@@ -83,9 +83,9 @@ def _run_fm(args, **kwargs):
                 logger.info('')
                 continue
 
-            limit = 500
-            if args.limit < limit:
-                limit = args.limit
+            limit = int(args.limit)
+            if limit > 500:
+                limit = 500
 
             try:
                 for i in s.fetch_csirtg(f, limit=limit):
