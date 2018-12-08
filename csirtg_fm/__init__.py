@@ -209,7 +209,7 @@ class FM(object):
         if limit:
             indicators = itertools.islice(indicators, int(limit))
 
-        # indicators = (i for i in indicators if not self.is_archived(i))
+        indicators = (i for i in indicators if not self.is_archived(i))
         indicators = (self.confidence(i) for i in indicators)
 
         if self.ml:

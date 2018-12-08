@@ -83,8 +83,16 @@ def _run_fm(args, **kwargs):
                 logger.info('')
                 continue
 
-            for i in s.fetch_csirtg(f, limit=args.limit):
-                data.append(i)
+            limit = int(args.limit)
+            if limit > 500:
+                limit = 500
+
+            try:
+                for i in s.fetch_csirtg(f, limit=limit):
+                    data.append(i)
+            except Exception as e:
+                logger.error(e)
+                continue
 
         else:
             from .clients.http import Client
