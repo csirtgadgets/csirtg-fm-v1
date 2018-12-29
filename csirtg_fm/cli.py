@@ -55,7 +55,8 @@ def _run_fm(args, **kwargs):
 
     logger.info('starting run...')
 
-    s = FM(archiver=archiver, client=args.client, goback=goback, ml=args.ml)
+    s = FM(archiver=archiver, client=args.client, goback=goback, ml=args.ml,
+           skip_invalid=args.skip_invalid)
 
     fetch = True
     if args.no_fetch:
@@ -86,6 +87,9 @@ def _run_fm(args, **kwargs):
             limit = int(args.limit)
             if limit > 500:
                 limit = 500
+
+            if r.limit and int(r.limit) < limit:
+                limit = int(r.limit)
 
             try:
                 for i in s.fetch_csirtg(f, limit=limit):
@@ -119,7 +123,8 @@ def _run_fm(args, **kwargs):
                 logger.info('processing: {} - {}:{}'.format(args.rule, r.provider, f))
 
         try:
-            for i in s.process(r, f, parser_name, cli, limit=args.limit, indicators=data):
+            for i in s.process(r, f, parser_name, cli, limit=args.limit,
+                               indicators=data):
                 if not i:
                     continue
 

@@ -60,6 +60,9 @@ def _is_xml(f, mime):
 
 
 def _is_json(f, mime):
+    if mime == 'application/json':
+        return 'json'
+
     if not _is_ascii(f, mime):
         return
 
