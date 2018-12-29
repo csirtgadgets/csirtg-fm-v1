@@ -13,8 +13,8 @@ SQLAlchemy>=1.2
 tornado>=5.0
 nltk>=3.2,<3.3
 
+csirtg_indicator>=2.0a19
 csirtgsdk>=1.0.1
-csirtg_indicator>=2.0a2
 csirtg_mail>=0.0.0a9
 
 tensorflow==1.8
