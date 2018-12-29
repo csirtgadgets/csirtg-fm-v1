@@ -83,6 +83,7 @@ setup(
         'csirtg-domainsml-tf',
         'csirtg-urlsml-tf',
         'csirtg-ipsml-tf',
+        'csirtgsdk'
     ],
     entry_points={
         'console_scripts': [

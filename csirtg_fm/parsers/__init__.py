@@ -8,6 +8,7 @@ RE_COMMENTS = '^([#|;]+)'
 
 logger = logging.getLogger(__name__)
 
+
 class Parser(object):
 
     def __init__(self, **kwargs):
@@ -16,6 +17,7 @@ class Parser(object):
         self.rule = kwargs.get('rule')
         self.feed = kwargs.get('feed')
         self.skip_first = kwargs.get('skip_first')
+        self.skip_invalid = kwargs.get('skip_invalid')
         self.skip = kwargs.get('skip')
         self.line_filter = kwargs.get('line_filter')
         self.limit = kwargs.get('limit')
