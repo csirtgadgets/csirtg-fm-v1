@@ -22,6 +22,8 @@ from csirtg_fm.utils import setup_logging, get_argument_parser, load_plugin, set
 from csirtg_fm.exceptions import RuleUnsupported
 from csirtg_fm.constants import FIREBALL_SIZE
 from csirtg_fm.utils.content import get_type
+from csirtg_fm.utils.confidence import estimate_confidence
+
 from .rule import load_rules
 from .archiver import Archiver, NOOPArchiver
 
@@ -96,35 +98,8 @@ class FM(object):
         return i
 
     def confidence(self, i):
-        if i.confidence:
-            return i
-
-        i.confidence = 2
-        if i.tags and len(i.tags) > 1:
-            i.confidence = 3
-
-        if i.itype in ['md5', 'sha1', 'sha256', 'sha512']:
-            i.confidence = 4
-            return i
-
-        if i.itype == 'ipv4':
-            if not i.tags:
-                i.confidence = 2
-
-            elif 'scanner' in i.tags:
-                i.confidence = 4
-
-            elif len(i.tags) > 1:
-                i.confidence = 4
-
-        elif i.itype == 'url' and len(i.tags) > 1 or 'phishing' in i.tags:
-            i.confidence = 4
-
-        elif i.itype == 'email' and len(i.tags) > 1:
-            i.confidence = 4
-
-        if i.probability and i.probability >= 84:
-            i.confidence = 4
+        if not i.confidence:
+            i.confidence = estimate_confidence(i)
 
         return i
 

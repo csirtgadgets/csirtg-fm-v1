@@ -30,8 +30,6 @@ def load_rules(rule, feed=None):
         for r, feed in _load_rules_dir(rule):
             yield r, feed
 
-        return
-
     logger.info("processing %s - %s" % (rule, feed))
     try:
         rule = Rule(path=rule)
