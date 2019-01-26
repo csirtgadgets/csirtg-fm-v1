@@ -1,11 +1,14 @@
 from csirtgsdk.client import Client as CSIRTGClient
 from csirtgsdk.feed import Feed
 from csirtgsdk.indicator import Indicator
+from csirtg_fm.constants import VERSION
 from pprint import pprint
+
 
 class Client(object):
     def __init__(self, **kwargs):
         self.handle = CSIRTGClient()
+        self.handle.session.headers['User-Agent'] = 'csirtg-fm/%s' % VERSION
 
     def ping(self):
         rv = self.handle.get('https://csirtg.io/api')
