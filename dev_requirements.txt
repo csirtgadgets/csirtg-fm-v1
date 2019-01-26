@@ -1,4 +1,5 @@
 coverage>=4.2
+pytest>=2.9.1
 pytest-cov>=2.2.1
-pytest>=2.8.0
+pytest-pep8
 -r requirements.txt
