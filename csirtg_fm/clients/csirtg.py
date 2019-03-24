@@ -38,10 +38,7 @@ class Client(object):
             d['feed'] = self.feed
             d['user'] = self.user
 
-            i = Indicator(
-                self.handle,
-                d
-            )
+            i = Indicator(d)
 
             rv = i.submit()
             indicators.append(rv)
