@@ -1,4 +1,4 @@
-from csirtgsdk.client import Client as CSIRTGClient
+from csirtgsdk.client.http import HTTP as CSIRTGClient
 from csirtgsdk.feed import Feed
 from csirtgsdk.indicator import Indicator
 from csirtg_fm.constants import VERSION
@@ -22,7 +22,8 @@ class Client(object):
             i['last_at'] = i['lasttime']
             i['first_at'] = i.get('firsttime')
             i['provider'] = 'csirtg.io'
-            i['reference'] = 'https://csirtg.io/users/%s/feeds/%s' % (user, feed)
+            i['reference'] = 'https://csirtg.io/users/%s/feeds/%s' % (user,
+                                                                      feed)
             i['tlp'] = i.get('tlp', 'green')
 
         return data
@@ -37,10 +38,7 @@ class Client(object):
             d['feed'] = self.feed
             d['user'] = self.user
 
-            i = Indicator(
-                self.handle,
-                d
-            )
+            i = Indicator(d)
 
             rv = i.submit()
             indicators.append(rv)
