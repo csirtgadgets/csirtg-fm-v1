@@ -176,6 +176,7 @@ class FM(object):
 
         indicators = (i for i in indicators if self.is_valid(i))
         indicators = (self.clean_indicator(i) for i in indicators)
+        indicators = (i.format_keys() for i in indicators)
 
         # check to see if the indicator is too old
         if self.goback:
@@ -205,7 +206,7 @@ class FM(object):
             # archive
             self.archiver.begin()
             for i in batch:
-                yield i.format_keys()
+                yield i
                 self.archiver.create(i)
 
             # commit
