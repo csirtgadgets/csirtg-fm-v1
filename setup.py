@@ -55,8 +55,8 @@ setup(
     description="The FASTEST way to consume threat intel",
     long_description="The FASTEST way to consume threat intel",
     url="https://github.com/csirtgadgets/fuzzy-chainsaw",
-    license='MPL2',
     classifiers=[
+               "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
                "Topic :: System :: Networking",
                "Environment :: Other Environment",
                "Intended Audience :: Developers",
