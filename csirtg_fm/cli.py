@@ -75,29 +75,43 @@ def _run_fm(args, **kwargs):
         # detect which client we should be using
 
         if '/' in f:
-            parser_name = 'csirtg'
-            cli = None
-            if not os.getenv('CSIRTG_TOKEN'):
-                logger.info('')
-                logger.info('CSIRTG_TOKEN var not set in ENV, skipping %s' % f)
-                logger.info('Sign up for a Free account: https://csirtg.io')
-                logger.info('')
-                continue
+            if 'csirtgadgets' in f:
+                parser_name = 'csirtg'
+                cli = None
+                if not os.getenv('CSIRTG_TOKEN'):
+                    logger.info('')
+                    logger.info('CSIRTG_TOKEN var not set in ENV, skipping %s' % f)
+                    logger.info('Sign up for a Free account: https://csirtg.io')
+                    logger.info('')
+                    continue
 
-            limit = int(args.limit)
-            if limit > 500:
-                limit = 500
+                limit = int(args.limit)
+                if limit > 500:
+                    limit = 500
 
-            if r.limit and int(r.limit) < limit:
-                limit = int(r.limit)
+                if r.limit and int(r.limit) < limit:
+                    limit = int(r.limit)
 
-            try:
-                for i in s.fetch_csirtg(f, limit=limit):
+                try:
+                    for i in s.fetch_csirtg(f, limit=limit):
+                        data.append(i)
+                except Exception as e:
+                    logger.error(e)
+                    continue
+
+            elif 'apwg' in f:
+                parser_name = 'apwg'
+                cli = None
+
+                limit = int(args.limit)
+                if limit > 500:
+                    limit = 500
+
+                if r.limit and int(r.limit) < limit:
+                    limit = int(r.limit)
+
+                for i in s.fetch_apwg(f, limit=limit):
                     data.append(i)
-            except Exception as e:
-                logger.error(e)
-                continue
-
         else:
             from .clients.http import Client
             cli = Client(r, f, verify_ssl=verify_ssl)

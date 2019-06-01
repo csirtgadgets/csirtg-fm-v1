@@ -160,12 +160,21 @@ class FM(object):
         user, feed = f.split('/')
         return cli.fetch(user, feed, limit=limit)
 
+    def fetch_apwg(self, f, limit):
+        from apwgsdk.client import Client as apwgcli
+        cli = apwgcli()
+        f = f.split('/')[1]
+        indicators = list(cli.indicators(feed=f, limit=limit, no_last_run=True))
+        [i.geo_resolve() for i in indicators]
+        indicators = [i.__dict__() for i in indicators]
+        return indicators
+
     def process(self, rule, feed, parser_name, cli, limit=None, indicators=[]):
 
         if rule.feeds[feed].get('limit') and limit == 25:
             limit = rule.feeds[feed].get('limit')
 
-        if parser_name != 'csirtg':
+        if parser_name not in ['csirtg', 'apwg']:
             # detect and load the parser
             plugin_path = os.path.join(os.path.dirname(__file__), 'parsers')
             parser = load_plugin(plugin_path, parser_name)
