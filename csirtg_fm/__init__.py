@@ -160,10 +160,14 @@ class FM(object):
         user, feed = f.split('/')
         return cli.fetch(user, feed, limit=limit)
 
-    def fetch_apwg(self, limit):
+    def fetch_apwg(self, f, limit):
         from apwgsdk.client import Client as apwgcli
         cli = apwgcli()
-        yield cli.indicators(limit, no_last_run=True)
+        f = f.split('/')[1]
+        indicators = list(cli.indicators(feed=f, limit=limit, no_last_run=True))
+        [i.geo_resolve() for i in indicators]
+        indicators = [i.__dict__() for i in indicators]
+        return indicators
 
     def process(self, rule, feed, parser_name, cli, limit=None, indicators=[]):
 
