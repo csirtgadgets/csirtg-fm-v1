@@ -98,6 +98,24 @@ def _run_fm(args, **kwargs):
                 logger.error(e)
                 continue
 
+        elif not os.getenv('APWG_TOKEN', '') != '':
+            parser_name = 'apwg'
+            cli = None
+
+            limit = int(args.limit)
+            if limit > 500:
+                limit = 500
+
+            if r.limit and int(r.limit) < limit:
+                limit = int(r.limit)
+
+            try:
+                for i in s.fetch_apwg(f, limit=limit):
+                    data.append(i)
+            except Exception as e:
+                logger.error(e)
+                continue
+
         else:
             from .clients.http import Client
             cli = Client(r, f, verify_ssl=verify_ssl)
