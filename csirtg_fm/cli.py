@@ -75,6 +75,7 @@ def _run_fm(args, **kwargs):
         # detect which client we should be using
 
         if '/' in f:
+            data = []
             if 'csirtgadgets' in f:
                 parser_name = 'csirtg'
                 cli = None
