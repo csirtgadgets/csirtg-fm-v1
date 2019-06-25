@@ -6,6 +6,8 @@ except ImportError:
 import logging
 import os
 import arrow
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from sqlalchemy import Column, Integer, create_engine, DateTime, UnicodeText, Text, asc
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session, load_only
@@ -13,16 +15,42 @@ from csirtg_fm.constants import CACHE_PATH
 from sqlalchemy.sql.expression import func
 from pprint import pprint
 
-TRACE = os.environ.get('CSIRTG_SMRT_SQLITE_TRACE')
-CLEANUP_DAYS = os.getenv('CSIRTG_SMRT_ARCHIVER_CLEANUP_DAYS', 60)
+TRACE = os.environ.get('CSIRTG_FM_SQLITE_TRACE')
+CLEANUP_DAYS = os.getenv('CSIRTG_FM_ARCHIVER_CLEANUP_DAYS', 90)
 
-DB_FILE = os.path.join(CACHE_PATH, 'smrt.db')
+DB_FILE = os.path.join(CACHE_PATH, 'fm.db')
+
+# http://stackoverflow.com/q/9671490/7205341
+SYNC = os.environ.get('CIF_STORE_SQLITE_SYNC', 'NORMAL')
+
+# https://www.sqlite.org/pragma.html#pragma_cache_size
+CACHE_SIZE = os.environ.get('CIF_STORE_SQLITE_CACHE_SIZE', 512000000)  # 512MB
+
+AUTO_VACUUM = True
+if os.getenv('CIF_STORE_SQLITE_AUTO_VACUUM', '1') == '0':
+    AUTO_VACUUM = False
+
 Base = declarative_base()
 
 logger = logging.getLogger(__name__)
 
 if not TRACE:
     logger.setLevel(logging.ERROR)
+
+
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.execute("PRAGMA journal_mode = MEMORY")
+    cursor.execute("PRAGMA synchronous = {}".format(SYNC))
+    cursor.execute("PRAGMA temp_store = MEMORY")
+    cursor.execute("PRAGMA cache_size = {}".format(CACHE_SIZE))
+
+    if AUTO_VACUUM:
+        cursor.execute("PRAGMA auto_vacuum = INCREMENTAL")
+
+    cursor.close()
 
 
 class Indicator(Base):
@@ -168,10 +196,6 @@ class Archiver(object):
             tags = ','.join(indicator.tags)
 
         i = indicator.indicator
-        # if PYVERSION == 2:
-        #     if isinstance(i, str):
-        #         i = unicode(i)
-
         i = Indicator(indicator=i, provider=indicator.provider, group=indicator.group,
                       last_at=indicator.last_at, tags=tags, first_at=indicator.first_at)
 
