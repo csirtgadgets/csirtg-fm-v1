@@ -155,7 +155,8 @@ def _run_fm(args, **kwargs):
             print(l)
 
     logger.info('cleaning up')
-    archiver.cleanup()
+    count = archiver.cleanup()
+    logger.info('purged %i records' % count)
     archiver.clear_memcache()
 
     logger.info('finished run')

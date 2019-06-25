@@ -170,7 +170,6 @@ class FM(object):
         return indicators
 
     def process(self, rule, feed, parser_name, cli, limit=None, indicators=[]):
-
         if rule.feeds[feed].get('limit') and limit == 25:
             limit = rule.feeds[feed].get('limit')
 
@@ -182,6 +181,7 @@ class FM(object):
 
             # bring up the pipeline
             indicators = parser.process(skip_invalid=self.skip_invalid)
+
 
         indicators = (i for i in indicators if self.is_valid(i))
         indicators = (self.clean_indicator(i) for i in indicators)
